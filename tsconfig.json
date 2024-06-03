@@ -1,0 +1,4 @@
+{
+    "extends": "@workleap/typescript-configs/monorepo-root.json",
+    "exclude": ["packages", "templates", "node_modules"],
+}
