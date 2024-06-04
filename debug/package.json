@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "run-with-download": "pnpm dlx @workleap/create-schemas arg1 arg2",
-    "run-from-dev-dep": "pnpm create @workleap/schemas args1 args2"
+    "run-from-dev-dep": "pnpm create-schemas args1 args2"
   },
   "devDependencies": {
     "@workleap/create-schemas": "0.0.1-preview.0"

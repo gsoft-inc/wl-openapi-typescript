@@ -17,9 +17,12 @@ Tools to generate TypeScript schemas from OpenAPI.
 Add a script in package.json to call `@workleap/create-schemas`
 
 ```json
-    "scripts": {
-        "generate-schemas": "pnpm dlx @workleap/create-schemas arg1 arg2",
-    }
+  "scripts": {
+    "create-schemas": "pnpm create-schemas args1 args2"
+  },
+  "devDependencies": {
+    "@workleap/create-schemas": "0.0.1"
+  }
 ```
 
 ## 🤝 Contributing
