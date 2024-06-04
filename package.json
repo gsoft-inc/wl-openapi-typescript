@@ -19,7 +19,7 @@
         "lint:eslint": "eslint --ext .js,.ts,.tsx . --max-warnings=-1 --cache --cache-location node_modules/.cache/eslint",
         "lint:types": "pnpm -r --parallel --include-workspace-root exec tsc",
 
-        "release": "pnpm build && pnpm -r --filter \"./packages/**\" publish",
+        "release": "pnpm build && pnpm -r --filter \"./packages/**\" publish --no-git-checks",
 
         "reset": "pnpm clean && pnpm reset:modules",
         "clean": "pnpm -r --parallel --include-workspace-root exec pnpm dlx rimraf dist node_modules/.cache",
