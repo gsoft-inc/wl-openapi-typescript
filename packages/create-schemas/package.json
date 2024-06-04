@@ -1,0 +1,38 @@
+{
+    "name": "@workleap/create-schemas",
+    "author": "Workleap",
+    "version": "0.0.1-preview.2",
+    "description": "CLI to generate Typescript schemas from an OpenAPI document",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gsoft-inc/wl-openapi-typescript.git",
+        "directory": "packages/create-schemas"
+    },
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    },
+    "type": "module",
+    "bin": "./dist/bin.js",
+    "scripts": {
+        "debug": "node dist/bin.js arg1 arg2",
+        "dev": "pnpm run build && pnpm run dev:link && pnpm run dev:tsup",
+        "dev:link": "pnpm link --global",
+        "dev:tsup": "tsup --config tsup.dev.ts",
+        "build": "tsup --config tsup.build.ts"
+    },
+    "devDependencies": {
+        "@swc/helpers": "0.5.11",
+        "@types/node": "20.14.1",
+        "@workleap/eslint-plugin": "3.2.2",
+        "@workleap/swc-configs": "2.2.3",
+        "@workleap/tsup-configs": "3.0.6",
+        "eslint": "8.57.0",
+        "tsup": "8.1.0",
+        "typescript": "5.4.5"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
