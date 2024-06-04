@@ -16,24 +16,21 @@
     "type": "module",
     "bin": "./dist/bin.js",
     "scripts": {
+        "debug": "node dist/bin.js arg1 arg2",
         "dev": "pnpm run build && pnpm run dev:link && pnpm run dev:tsup",
         "dev:link": "pnpm link --global",
         "dev:tsup": "tsup --config tsup.dev.ts",
         "build": "tsup --config tsup.build.ts"
     },
     "devDependencies": {
-        "@swc/core": "1.3.68",
-        "@swc/helpers": "0.5.1",
-        "@swc/jest": "0.2.26",
-        "@types/jest": "29.5.3",
-        "@types/node": "18.16.19",
-        "@typescript-eslint/parser": "5.62.0",
-        "@workleap/eslint-plugin": "1.8.2",
-        "@workleap/swc-configs": "1.0.0",
-        "@workleap/tsup-configs": "2.0.0",
-        "eslint": "8.56.0",
-        "tsup": "7.1.0",
-        "typescript": "5.0.4"
+        "@swc/helpers": "0.5.11",
+        "@types/node": "20.14.1",
+        "@workleap/eslint-plugin": "3.2.2",
+        "@workleap/swc-configs": "2.2.3",
+        "@workleap/tsup-configs": "3.0.6",
+        "eslint": "8.57.0",
+        "tsup": "8.1.0",
+        "typescript": "5.4.5"
     },
     "engines": {
         "node": ">=18.0.0"

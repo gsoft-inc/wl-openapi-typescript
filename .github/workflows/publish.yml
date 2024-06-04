@@ -2,7 +2,7 @@ name: Publish
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: ["main"]
     tags: ["*.*.*"]
     paths-ignore: ["*.md"]
 env:
@@ -51,7 +51,7 @@ jobs:
       - name: Install Dependencies
         run: pnpm i --frozen-lockfile
 
-      - name: Ppublish to NPM
+      - name: Publish to NPM
         run: pnpm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

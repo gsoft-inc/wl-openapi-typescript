@@ -1,4 +1,6 @@
 {
-    "extends": "@workleap/typescript-configs/monorepo-root.json",
+    "extends": "@workleap/typescript-configs/monorepo-workspace",
     "exclude": ["packages", "templates", "node_modules"],
+    // Prevent TS18003 since there are no TS files at the root at the moment.
+    "references": []
 }
