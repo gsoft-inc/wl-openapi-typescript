@@ -76,7 +76,7 @@ pnpm lint
 
 #### Linting errors
 
-If you got linting error, most of the time, they can be fixed automatically using `eslint . --fix`, if not, follow the report provided by `pnpm lint`.
+If you got linting error, most of the time, they can be fixed automatically using `pnpm run eslint-fix`, if not, follow the report provided by `pnpm lint`.
 
 ### clean/reset
 

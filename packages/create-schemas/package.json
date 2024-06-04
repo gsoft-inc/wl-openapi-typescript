@@ -16,7 +16,7 @@
     "type": "module",
     "bin": "./dist/bin.js",
     "scripts": {
-        "debug": "node dist/bin.js arg1 arg2",
+        "debug": "node dist/bin.js",
         "dev": "pnpm run build && pnpm run dev:link && pnpm run dev:tsup",
         "dev:link": "pnpm link --global",
         "dev:tsup": "tsup --config tsup.dev.ts",
@@ -36,6 +36,7 @@
         "node": ">=18.0.0"
     },
     "dependencies": {
-        "openapi-typescript": "7.0.0-rc.0"
+        "openapi-typescript": "7.0.0-rc.0",
+        "typescript": "5.4.5"
     }
 }

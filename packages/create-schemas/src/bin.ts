@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import openapiTS, { astToString } from "openapi-typescript";
-import ts, { InterfaceDeclaration, PropertySignature } from "typescript";
+import { getSchemaNames, generateExportSchemaTypeDeclaration, generateExportEndpointsTypeDeclaration } from "./astHelper.ts";
 
 console.log("Received command: ", process.argv);
 
@@ -12,37 +12,22 @@ const outputPath = args[1] ?? "C:/dev/idp/wl-openapi-typescript/wl-openapi-types
 console.log(`openApiPath: ${openApiPath}`);
 console.log(`outputPath: ${outputPath}`);
 
-
-// 1. Create a TypeScript AST from the OpenAPI schema
+// Create a TypeScript AST from the OpenAPI schema
 const ast = await openapiTS(new URL(openApiPath));
 
-// 2. Find the node where all the DTOs are defined, and extract their names
-// const componentsNode = ast.find((node) => ts.isInterfaceDeclaration(node) && node.name.escapedText === "components") as InterfaceDeclaration;
-//console.log(ts.ClassificationType);
-// const schemaNode = componentsNode.members.find((node) => ts.isPropertySignature(node) && ts.isIdentifier(node.name) && node.name.escapedText === "schemas") as PropertySignature;
-const schemaNames: string[] = [];
-// const typeNode = schemaNode.type;
-// if (typeNode && ts.isTypeNode(typeNode)) {
-//   typeNode.forEachChild((node) => {
-//     if (ts.isPropertySignature(node)) {
-//       const nameNode = node.name;
-//       if (ts.isIdentifier(nameNode)) {
-//         schemaNames.push(nameNode.escapedText as string);
-//       }
-//     }
-//   });
-// }
+// Find the node where all the DTOs are defined, and extract their names
+const schemaNames = getSchemaNames(ast);
 
-
-// 3. Convert the AST to a string
+// Convert the AST to a string
 let contents = astToString(ast);
 
-// 4. Add the `export type X = components["schemas"]["X"]` lines
+// Re-export schemas types
 for (const schemaName of schemaNames) {
-    contents +=
-      `export type ${schemaName} = components["schemas"]["${schemaName}"];\n`;
+    contents += `${generateExportSchemaTypeDeclaration(schemaName)}\n`;
 }
 
+// Re-export endpoints keys
+contents += `\n${generateExportEndpointsTypeDeclaration()}\n`;
 
 // 5. Write the content to a file (TODO: Validate USER experience)
 fs.mkdirSync("./dist", { recursive: true });
