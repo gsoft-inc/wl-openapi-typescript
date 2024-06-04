@@ -34,6 +34,10 @@ create-schemas
 
 In VSCode, after building the package you can debug it by using the command `debug` inside `packages/create-schemas/package.json`.
 
+## How to release packages
+
+TODO
+
 ## Commands
 
 From the project root, you have access to many commands, the main ones are:
