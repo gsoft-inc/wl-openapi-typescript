@@ -2,16 +2,11 @@ name: CI
 
 # Pnpm setup based on https://github.com/pnpm/action-setup#use-cache-to-reduce-installation-time
 
-# on:
-#   push:
-#     branches: [ "main" ]
-#   pull_request:
-#     branches: [ "main" ]
-
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
-    branches: [main]
-    paths-ignore: ["*.md"]
+    branches: [ "main" ]
 
 env:
   CI: true
