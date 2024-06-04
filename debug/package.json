@@ -1,0 +1,17 @@
+{
+  "name": "debug",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "run-with-download": "pnpm dlx @workleap/create-schemas arg1 arg2",
+    "run-from-dev-dep1": "pnpm @workleap/create-schemas arg1 arg2",
+    "run-from-dev-dep2": "create-schemas arg1 arg2"
+  },
+  "devDependencies": {
+    "@workleap/create-schemas": "0.0.1-preview.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
