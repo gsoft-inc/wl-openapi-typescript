@@ -63,4 +63,4 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.WORKLEAP_NPM_TOKEN}}
 
       - name: Publish
-        run: pnpm publish --tag latest --access=public --no-git-checks
+        run: pnpm run release
