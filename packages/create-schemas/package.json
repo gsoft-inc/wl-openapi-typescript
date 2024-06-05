@@ -1,7 +1,7 @@
 {
     "name": "@workleap/create-schemas",
     "author": "Workleap",
-    "version": "0.0.1-preview.2",
+    "version": "0.1.0",
     "description": "CLI to generate Typescript schemas from an OpenAPI document",
     "license": "Apache-2.0",
     "repository": {
@@ -16,7 +16,6 @@
     "type": "module",
     "bin": "./dist/bin.js",
     "scripts": {
-        "debug": "node dist/bin.js arg1 arg2",
         "dev": "pnpm run build && pnpm run dev:link && pnpm run dev:tsup",
         "dev:link": "pnpm link --global",
         "dev:tsup": "tsup --config tsup.dev.ts",
@@ -34,5 +33,11 @@
     },
     "engines": {
         "node": ">=18.0.0"
+    },
+    "dependencies": {
+        "@types/yargs-parser": "21.0.3",
+        "openapi-typescript": "7.0.0-rc.0",
+        "typescript": "5.4.5",
+        "yargs-parser": "21.1.1"
     }
 }
