@@ -35,9 +35,9 @@
         "node": ">=18.0.0"
     },
     "dependencies": {
-        "@types/yargs-parser": "^21.0.3",
+        "@types/yargs-parser": "21.0.3",
         "openapi-typescript": "7.0.0-rc.0",
         "typescript": "5.4.5",
-        "yargs-parser": "^21.1.1"
+        "yargs-parser": "21.1.1"
     }
 }
