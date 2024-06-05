@@ -1,5 +1,5 @@
 export interface paths {
-    "/good-vibes-points": {
+    "/good-vibes-points/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -44,11 +44,11 @@ export type $defs = Record<string, never>;
 export interface operations {
     GetGoodVibesPoint: {
         parameters: {
-            query: {
+            query?: never;
+            header?: never;
+            path: {
                 userId: string;
             };
-            header?: never;
-            path?: never;
             cookie?: never;
         };
         requestBody?: never;
