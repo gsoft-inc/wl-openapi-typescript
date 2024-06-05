@@ -50,5 +50,5 @@ export function generateExportSchemaTypeDeclaration(schemaName: string): string 
 
 // TODO: Validate how deal with route params
 export function generateExportEndpointsTypeDeclaration(): string {
-    return `export type Endpoints = keyof paths;`;
+    return "export type Endpoints = keyof paths;";
 }
