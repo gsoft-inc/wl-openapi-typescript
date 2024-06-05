@@ -1,41 +1,18 @@
 import fs from "node:fs";
 import path from "path";
-import parser from "yargs-parser";
-import openapiTS, { astToString } from "openapi-typescript";
+import { astToString } from "openapi-typescript";
 import { getSchemaNames, generateExportSchemaTypeDeclaration, generateExportEndpointsTypeDeclaration } from "./astHelper.ts";
+import { getAst, getOpenApiTsOptionForArgs, getOutputPath } from "./openapiTypescriptHelper.ts";
 
 console.log("Received command: ", process.argv);
 
 // Access command-line arguments
 const args = process.argv.slice(2);
 
-const flags = parser(args, {
-    boolean: [
-        "additionalProperties",
-        "alphabetize",
-        "arrayLength",
-        "defaultNonNullable",
-        "propertiesRequiredByDefault",
-        "emptyObjectsUnknown",
-        "enum",
-        "enumValues",
-        "excludeDeprecated",
-        "exportType",
-        "help",
-        "immutable",
-        "pathParamsAsTypes"
-    ],
-    string: ["output", "redocly"],
-    alias: {
-        redocly: ["c"],
-        exportType: ["t"],
-        output: ["o"]
-    }
-});
+const openApiTsOptions = getOpenApiTsOptionForArgs(args);
 
 const openApiPath = args[0];
-const outputPath = flags.output || "openapi-types.ts";
-const openapiTypescriptArgs = args.slice(2).join(" ") ?? "";
+const outputPath = getOutputPath(args);
 
 if (!openApiPath || !outputPath) {
     throw new Error("Both openApiPath and outputPath must be provided");
@@ -44,23 +21,9 @@ if (!openApiPath || !outputPath) {
 console.log("Starting OpenAPI TypeScript types generation...");
 console.log(`\t-openApiPath: ${openApiPath}`);
 console.log(`\t-outputPath: ${outputPath}`);
-console.log(`\t-openapiTypescriptArgs: ${openapiTypescriptArgs}`);
 
 // Create a TypeScript AST from the OpenAPI schema
-const ast = await openapiTS(new URL(openApiPath), {
-    additionalProperties: flags.additionalProperties,
-    alphabetize: flags.alphabetize,
-    arrayLength: flags.arrayLength,
-    propertiesRequiredByDefault: flags.propertiesRequiredByDefault,
-    defaultNonNullable: flags.defaultNonNullable,
-    emptyObjectsUnknown: flags.emptyObjectsUnknown,
-    enum: flags.enum,
-    enumValues: flags.enumValues,
-    excludeDeprecated: flags.excludeDeprecated,
-    exportType: flags.exportType,
-    immutable: flags.immutable,
-    pathParamsAsTypes: flags.pathParamsAsTypes
-});
+const ast = await getAst(openApiPath, openApiTsOptions);
 
 // Find the node where all the DTOs are defined, and extract their names
 const schemaNames = getSchemaNames(ast);
@@ -78,8 +41,13 @@ for (const schemaName of schemaNames) {
 console.log("Exporting endpoints keys.");
 contents += `\n${generateExportEndpointsTypeDeclaration()}\n`;
 
-// 5. Write the content to a file (TODO: Validate USER experience)
+// Write the content to a file
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, contents);
 
-console.log(`OpenAPI TypeScript types have been generated successfully at ${outputPath}! 🎉`);
+
+if (schemaNames.length === 0) {
+    console.warn(`⚠️ Suspiciously no schemas where found in the OpenAPI document at ${openApiPath}. It might due to a flag converting interface to type which is not supported at the moment. ⚠️`);
+} else {
+    console.log(`OpenAPI TypeScript types have been generated successfully at ${outputPath}! 🎉`);
+}

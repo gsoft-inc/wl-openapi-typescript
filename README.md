@@ -25,10 +25,9 @@ Add a script in package.json to call `@workleap/create-schemas`
   }
 ```
 
-It is also fowarding all the [flags of openapi-typescript](https://openapi-ts.pages.dev/cli#flags) for more customization.
+It is also fowarding all the [flags of openapi-typescript](https://openapi-ts.pages.dev/cli#flags) for more customization. Note that not all flags are supported correctly.
 
-(TODO: Not supporting type and immutable flags)
-(also test with path-params-as-type)
+If you plan to lookup paths with route params we recommend using the `--path-params-as-types` flag
 
 ### Example
 

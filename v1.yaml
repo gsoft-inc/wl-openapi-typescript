@@ -3,7 +3,7 @@ info:
   title: OfficeVice.GoodVibe.WebApi
   version: '1.0'
 paths:
-  /good-vibes-points:
+  /good-vibes-points/{userId}:
     get:
       tags:
         - GoodVibesBank
@@ -11,7 +11,7 @@ paths:
       operationId: GetGoodVibesPoint
       parameters:
         - name: userId
-          in: query
+          in: path
           required: true
           schema:
             type: string
