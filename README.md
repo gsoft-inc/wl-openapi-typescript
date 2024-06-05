@@ -18,16 +18,16 @@ Add a script in package.json to call `@workleap/create-schemas`
 
 ```json
   "scripts": {
-    "create-schemas": "pnpm create-schemas path_or_public_url_to_openapi_document -o output_path"
+    "create-schemas": "pnpm create-schemas [path_or_public_url_to_openapi_document] -o [output_path] [optional_addition_flags]"
   },
   "devDependencies": {
-    "@workleap/create-schemas": "0.0.1"
+    "@workleap/create-schemas": "0.1.0"
   }
 ```
 
 It is also fowarding all the [flags of openapi-typescript](https://openapi-ts.pages.dev/cli#flags) for more customization. Note that not all flags are supported correctly.
 
-If you plan to lookup paths with route params we recommend using the `--path-params-as-types` flag
+If you plan to lookup paths with route parameters we recommend using the `--path-params-as-types` flag
 
 ### Example
 
@@ -187,7 +187,6 @@ export type Endpoints = keyof paths;
 ```
 
 For more details on how to use see [openapi-typescript documentation](https://openapi-ts.pages.dev/introduction)
-
 
 ## 🤝 Contributing
 
