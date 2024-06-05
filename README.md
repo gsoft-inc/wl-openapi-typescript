@@ -27,6 +27,9 @@ Add a script in package.json to call `@workleap/create-schemas`
 
 It is also fowarding all the [flags of openapi-typescript](https://openapi-ts.pages.dev/cli#flags) for more customization.
 
+(TODO: Not supporting type and immutable flags)
+(also test with path-params-as-type)
+
 ### Example
 
 By example from this OpenAPI document:
