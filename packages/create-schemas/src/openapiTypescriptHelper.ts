@@ -1,60 +1,31 @@
-import parser from "yargs-parser";
-import openapiTS, { type OpenAPITSOptions } from "openapi-typescript";
-import type ts from "typescript";
+import openapiTS, { astToString, type OpenAPITSOptions } from "openapi-typescript";
+import { generateExportEndpointsTypeDeclaration, generateExportSchemaTypeDeclaration, getSchemaNames } from "./astHelper.ts";
 
+export async function generateSchemas(openApiPath: string, outputPath: string, openApiTsOptions: OpenAPITSOptions): Promise<string> {
+    // Create a TypeScript AST from the OpenAPI schema
+    const ast = await openapiTS(new URL(openApiPath), openApiTsOptions);
 
-export function getOutputPath(args: string[]): string {
-    const flags = parser(args, {
-        string: ["output"],
-        alias: {
-            output: ["o"]
-        }
-    });
+    // Find the node where all the DTOs are defined, and extract their names
+    const schemaNames = getSchemaNames(ast);
 
-    return flags.output || "openapi-types.ts";
-}
+    // Convert the AST to a string
+    let contents = astToString(ast);
 
-export function getOpenApiTsOptionForArgs(args: string[]): OpenAPITSOptions {
-    const flags = parser(args, {
-        boolean: [
-            "additionalProperties",
-            "alphabetize",
-            "arrayLength",
-            "defaultNonNullable",
-            "propertiesRequiredByDefault",
-            "emptyObjectsUnknown",
-            "enum",
-            "enumValues",
-            "excludeDeprecated",
-            "exportType",
-            "help",
-            "immutable",
-            "pathParamsAsTypes"
-        ],
-        alias: {
-            redocly: ["c"],
-            exportType: ["t"]
-        }
-    });
+    // Re-export schemas types
+    console.log(`Exporting ${schemaNames.length} schemas.`);
+    for (const schemaName of schemaNames) {
+        contents += `${generateExportSchemaTypeDeclaration(schemaName)}\n`;
+    }
 
-    return {
-        additionalProperties: flags.additionalProperties,
-        alphabetize: flags.alphabetize,
-        arrayLength: flags.arrayLength,
-        propertiesRequiredByDefault: flags.propertiesRequiredByDefault,
-        defaultNonNullable: flags.defaultNonNullable,
-        emptyObjectsUnknown: flags.emptyObjectsUnknown,
-        enum: flags.enum,
-        enumValues: flags.enumValues,
-        excludeDeprecated: flags.excludeDeprecated,
-        exportType: flags.exportType,
-        immutable: flags.immutable,
-        pathParamsAsTypes: flags.pathParamsAsTypes
-    };
-}
+    // Re-export endpoints keys
+    console.log("Exporting endpoints keys.");
+    contents += `\n${generateExportEndpointsTypeDeclaration()}\n`;
 
-export async function getAst(path: string, options: OpenAPITSOptions): Promise<ts.Node[]> {
-    const ast = await openapiTS(new URL(path), options);
+    if (schemaNames.length === 0) {
+        console.warn(`⚠️ Suspiciously no schemas where found in the OpenAPI document at ${openApiPath}. It might due to a flag converting interface to type which is not supported at the moment. ⚠️`);
+    } else {
+        console.log(`OpenAPI TypeScript types have been generated successfully at ${outputPath}! 🎉`);
+    }
 
-    return ast;
+    return contents;
 }
