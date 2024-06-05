@@ -31,7 +31,7 @@ If you plan to lookup paths with route parameters we recommend using the `--path
 
 ### Example
 
-By example from this OpenAPI document:
+Given this OpenAPI document:
 
 ```yaml
 openapi: 3.0.1
@@ -98,7 +98,7 @@ components:
       additionalProperties: { }
 ```
 
-It will generate this schame file:
+It will generate this schema file:
 
 ```ts
 // From openapi-typescript
