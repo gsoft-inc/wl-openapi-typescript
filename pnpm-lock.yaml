@@ -24,7 +24,7 @@ importers:
   packages/create-schemas:
     dependencies:
       '@types/yargs-parser':
-        specifier: ^21.0.3
+        specifier: 21.0.3
         version: 21.0.3
       openapi-typescript:
         specifier: 7.0.0-rc.0
@@ -33,7 +33,7 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
       yargs-parser:
-        specifier: ^21.1.1
+        specifier: 21.1.1
         version: 21.1.1
     devDependencies:
       '@swc/helpers':
