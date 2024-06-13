@@ -19,6 +19,8 @@
         "lint:eslint": "eslint --ext .js,.ts,.tsx . --max-warnings=-1 --cache --cache-location node_modules/.cache/eslint",
         "lint:types": "pnpm -r --parallel --include-workspace-root exec tsc",
 
+        "eslint-fix": "eslint . --fix",
+
         "release": "pnpm build && pnpm -r --filter \"./packages/**\" publish --no-git-checks --access=public",
 
         "reset": "pnpm clean && pnpm reset:modules",

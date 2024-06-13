@@ -27,7 +27,7 @@ pnpm dev
 This will build the project in development mode and link the binary locally. Once done, you will be able to run it from a terminal:
 
 ```bash
-create-schemas
+create-schemas [path_to_openapi_documents] -o [output-path]
 ```
 
 ### Debug
@@ -36,7 +36,11 @@ In VSCode, after building the package you can debug it by using the command `deb
 
 ## How to release packages
 
-TODO
+This is a very basic and soon to be improved flow:
+
+1. Update package.json version
+2. Merge in main
+3. Create Release with a tag with the same version as package.json
 
 ## Commands
 
@@ -76,7 +80,7 @@ pnpm lint
 
 #### Linting errors
 
-If you got linting error, most of the time, they can be fixed automatically using `eslint . --fix`, if not, follow the report provided by `pnpm lint`.
+If you got linting error, most of the time, they can be fixed automatically using `pnpm eslint-fix`, if not, follow the report provided by `pnpm lint`.
 
 ### clean/reset
 
