@@ -32,7 +32,10 @@ create-schemas [path_to_openapi_documents] -o [output-path]
 
 ### Debug
 
-In VSCode, after building the package you can debug it by using the command `debug` inside `packages/create-schemas/package.json`.
+1. Execute the command `pnpm dev` to have hot-reload of changes
+2. Add breakpoints
+3. In VSCode use the launch settings `Debug Create-Schemas`
+
 
 ## How to release packages
 

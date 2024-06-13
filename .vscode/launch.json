@@ -7,14 +7,14 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Debug Create-Schemas",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/packages/create-schemas/src/bin.ts",
             "args": [
                 "${workspaceFolder}\\debug\\v1.yaml",
-                "-o ./schema.ts"
+                "-o ${workspaceFolder}\\debug\\schema.ts"
             ],
             "stopOnEntry": false,
             "outputCapture": "std",
