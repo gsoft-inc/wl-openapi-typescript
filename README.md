@@ -18,7 +18,7 @@ Add a script in package.json to call `@workleap/create-schemas`
 
 ```json
   "scripts": {
-    "create-schemas": "pnpm create-schemas [path_or_public_url_to_openapi_document] -o [output_path] [optional_addition_flags]"
+    "create-schemas": "create-schemas [path_or_public_url_to_openapi_document] -o [output_path] [optional_addition_flags]"
   },
   "devDependencies": {
     "@workleap/create-schemas": "0.1.0"
