@@ -2,8 +2,10 @@ import openapiTS, { astToString, type OpenAPITSOptions } from "openapi-typescrip
 import { generateExportEndpointsTypeDeclaration, generateExportSchemaTypeDeclaration, getSchemaNames } from "./astHelper.ts";
 
 export async function generateSchemas(openApiPath: string, outputPath: string, openApiTsOptions: OpenAPITSOptions): Promise<string> {
+    const CWD = new URL(`file://${process.cwd()}/`);
+
     // Create a TypeScript AST from the OpenAPI schema
-    const ast = await openapiTS(new URL(openApiPath), openApiTsOptions);
+    const ast = await openapiTS(new URL(openApiPath, CWD), openApiTsOptions);
 
     // Find the node where all the DTOs are defined, and extract their names
     const schemaNames = getSchemaNames(ast);

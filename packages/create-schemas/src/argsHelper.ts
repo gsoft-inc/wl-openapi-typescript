@@ -9,7 +9,7 @@ export function getOutputPath(args: string[]): string {
         }
     });
 
-    return flags.output || "openapi-types.ts";
+    return (flags.output || "openapi-types.ts").trim();
 }
 
 export function getOpenApiTsOptionForArgs(args: string[]): OpenAPITSOptions {
