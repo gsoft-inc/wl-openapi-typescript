@@ -11,23 +11,20 @@
     },
     "scripts": {
         "postinstall": "pnpm -r --parallel --include-workspace-root exec pnpm dlx rimraf node_modules/.cache",
-
         "dev": "pnpm --filter \"./packages/**\" -r dev",
         "build": "pnpm --filter \"./packages/**\" -r build",
-
         "lint": "pnpm run \"/^lint:.*/\"",
         "lint:eslint": "eslint --ext .js,.ts,.tsx . --max-warnings=-1 --cache --cache-location node_modules/.cache/eslint",
         "lint:types": "pnpm -r --parallel --include-workspace-root exec tsc",
-
         "eslint-fix": "eslint . --fix",
-
-        "release": "pnpm build && pnpm -r --filter \"./packages/**\" publish --no-git-checks --access=public",
-
         "reset": "pnpm clean && pnpm reset:modules",
         "clean": "pnpm -r --parallel --include-workspace-root exec pnpm dlx rimraf dist node_modules/.cache",
-        "reset:modules": "pnpm -r --parallel --include-workspace-root exec pnpm dlx rimraf node_modules pnpm-lock.yaml"
+        "reset:modules": "pnpm -r --parallel --include-workspace-root exec pnpm dlx rimraf node_modules pnpm-lock.yaml",
+        "changeset": "changeset",
+        "changeset:publish": "pnpm run build && changeset publish"
     },
     "devDependencies": {
+        "@changesets/cli": "2.27.7",
         "@workleap/eslint-plugin": "3.2.2",
         "@workleap/typescript-configs": "3.0.2",
         "eslint": "8.57.0",
