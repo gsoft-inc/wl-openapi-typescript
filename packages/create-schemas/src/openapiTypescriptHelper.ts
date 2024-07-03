@@ -1,11 +1,21 @@
-import openapiTS, { astToString, type OpenAPITSOptions } from "openapi-typescript";
-import { generateExportEndpointsTypeDeclaration, generateExportSchemaTypeDeclaration, getSchemaNames } from "./astHelper.ts";
+import openapiTS, { astToString } from "openapi-typescript";
+import {
+    generateExportEndpointsTypeDeclaration,
+    generateExportSchemaTypeDeclaration,
+    getSchemaNames
+} from "./astHelper.ts";
+import type { ResolvedConfig } from "./config.ts";
+import { pathToFileURL } from "url";
 
-export async function generateSchemas(openApiPath: string, outputPath: string, openApiTsOptions: OpenAPITSOptions): Promise<string> {
-    const CWD = new URL(`file://${process.cwd()}/`);
+export async function generateSchemas(config: ResolvedConfig): Promise<string> {
+    const base = pathToFileURL(config.root);
 
     // Create a TypeScript AST from the OpenAPI schema
-    const ast = await openapiTS(new URL(openApiPath, CWD), openApiTsOptions);
+    const ast = await openapiTS(new URL(config.input, base), {
+        ...config.openApiTsOptions,
+        silent: true,
+        cwd: config.root
+    });
 
     // Find the node where all the DTOs are defined, and extract their names
     const schemaNames = getSchemaNames(ast);
@@ -24,9 +34,13 @@ export async function generateSchemas(openApiPath: string, outputPath: string, o
     contents += `\n${generateExportEndpointsTypeDeclaration()}\n`;
 
     if (schemaNames.length === 0) {
-        console.warn(`⚠️ Suspiciously no schemas where found in the OpenAPI document at ${openApiPath}. It might due to a flag converting interface to type which is not supported at the moment. ⚠️`);
+        console.warn(
+            `⚠️ Suspiciously no schemas where found in the OpenAPI document at ${config.input}. It might due to a flag converting interface to type which is not supported at the moment. ⚠️`
+        );
     } else {
-        console.log(`OpenAPI TypeScript types have been generated successfully at ${outputPath}! 🎉`);
+        console.log(
+            `OpenAPI TypeScript types have been generated successfully at ${config.output}! 🎉`
+        );
     }
 
     return contents;

@@ -1,28 +1,28 @@
-import fs from "node:fs";
-import path from "path";
-import { getOpenApiTsOptionForArgs, getOutputPath } from "./argsHelper.ts";
+import { ZodError } from "zod";
+import { parseArgs, resolveConfig } from "./config.ts";
 import { generateSchemas } from "./openapiTypescriptHelper.ts";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 
-console.log("Received command: ", process.argv);
+try {
+    // Access command-line arguments
+    const config = await resolveConfig(parseArgs());
 
-// Access command-line arguments
-const args = process.argv.slice(2);
+    const contents = await generateSchemas(config);
 
-const openApiTsOptions = getOpenApiTsOptionForArgs(args);
-
-const openApiPath = args[0];
-const outputPath = getOutputPath(args);
-
-if (!openApiPath || !outputPath) {
-    throw new Error("Both openApiPath and outputPath must be provided");
+    // Write the content to a file
+    mkdirSync(dirname(config.output), { recursive: true });
+    writeFileSync(config.output, contents);
+} catch (error) {
+    if (error instanceof ZodError) {
+        printConfigurationErrors(error);
+    }
 }
 
-console.log("Starting OpenAPI TypeScript types generation...");
-console.log(`\t-openApiPath: ${openApiPath}`);
-console.log(`\t-outputPath: ${outputPath}`);
-
-const contents = await generateSchemas(openApiPath, outputPath, openApiTsOptions);
-
-// Write the content to a file
-fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-fs.writeFileSync(outputPath, contents);
+function printConfigurationErrors(error: ZodError) {
+    console.log("Invalid configuration:");
+    error.errors.forEach(issue => {
+        console.log(` - ${issue.path.join(".")}: ${issue.message}`);
+    });
+    console.log("Use --help to see available options.");
+}
