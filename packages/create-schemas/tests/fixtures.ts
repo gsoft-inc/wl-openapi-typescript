@@ -16,7 +16,7 @@ interface CreateTemporaryFolderOptions {
 export async function createTemporaryFolder({
     onTestFinished
 }: CreateTemporaryFolderOptions): Promise<string> {
-    const id = Math.random().toString(36).substring(2);
+    const id = crypto.randomUUID();
     const path = join(tempFolder, id);
 
     await mkdir(path, { recursive: true });
