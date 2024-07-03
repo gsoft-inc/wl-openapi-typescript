@@ -16,6 +16,8 @@ try {
 } catch (error) {
     if (error instanceof ZodError) {
         printConfigurationErrors(error);
+    } else {
+        throw error;
     }
 }
 
