@@ -1,0 +1,10 @@
+{
+  "name": "docs",
+  "private": true,
+  "scripts": {
+    "dev": "retype start"
+  },
+  "dependencies": {
+    "retypeapp": "^3.5.0"
+  }
+}

@@ -1,0 +1,32 @@
+# -------------------
+# Retype
+# -------------------
+
+input: ./src
+output: ./dist
+
+url: https://gsoft-inc.github.io/wl-openapi-typescript/
+
+branding:
+    title: openapi-typescript
+    logo: ./resources/logo.png
+
+favicon: ./resources/favicon.png
+
+edit:
+    repo: https://github.com/gsoft-inc/wl-openapi-typescript
+    base: ./apps/docs/src
+    branch: main
+
+footer:
+    copyright: "&copy; Copyright {{ year }} - Workleap"
+
+# To allow using {{ }} in code blocks.
+# View: https://github.com/retypeapp/retype/issues/622#issuecomment-1712391219.
+templating:
+    enabled: false
+
+verbose: true
+
+start:
+    pro: true
