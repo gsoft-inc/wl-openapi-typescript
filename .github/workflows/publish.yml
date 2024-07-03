@@ -5,6 +5,7 @@ on:
     branches:
     - main
 
+# Pnpm setup based on https://github.com/pnpm/action-setup#use-cache-to-reduce-installation-time
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
