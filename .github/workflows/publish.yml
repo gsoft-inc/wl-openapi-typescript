@@ -2,17 +2,15 @@ name: Publish
 
 on:
   push:
-    branches: ["main"]
-    tags: ["*.*.*"]
-    paths-ignore: ["*.md"]
-
-env:
-  CI: true
+    branches:
+    - main
 
 # Pnpm setup based on https://github.com/pnpm/action-setup#use-cache-to-reduce-installation-time
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  version:
+  release:
+    name: Release
     runs-on: ubuntu-latest
     permissions:
       id-token: write # required for provenance https://docs.npmjs.com/generating-provenance-statements#publishing-packages-with-provenance-via-github-actions
@@ -20,31 +18,29 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
       - name: Install Node.js
         uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        id: pnpm-install
         with:
           version: 9
           run_install: false
 
       - name: Get pnpm store directory
-        id: pnpm-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
       - name: Setup pnpm cache
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
@@ -52,10 +48,11 @@ jobs:
       - name: Install Dependencies
         run: pnpm i --frozen-lockfile
 
-      - name: Set publishing config
-        run: pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm run changeset:publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.WORKLEAP_NPM_TOKEN}}
-
-      - name: Publish
-        run: pnpm run release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.WORKLEAP_NPM_TOKEN }}
