@@ -1,11 +1,13 @@
 import { Worker } from "node:worker_threads";
 import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import type { OnTestFailedHandler } from "vitest";
 
-const tempFolder = join(process.cwd(), "node_modules", ".tmp");
-export const dataFolder = join(process.cwd(), "tests", "data");
+const tempFolder = fileURLToPath(
+    new URL("../node_modules/.tmp", import.meta.url)
+);
+export const dataFolder = fileURLToPath(new URL("./data", import.meta.url));
 
 interface CreateTemporaryFolderOptions {
     onTestFinished: (fn: OnTestFailedHandler) => void;
@@ -29,11 +31,10 @@ interface BinOptions {
 }
 
 export async function runCompiledBin(options: BinOptions): Promise<void> {
-    const binPath = pathToFileURL(require.resolve("../dist/bin.js"));
+    const binUrl = new URL("../dist/bin.js", import.meta.url);
 
-    const worker = new Worker(binPath, {
-        argv: [options.source, "-o", options.output],
-        stdout: false
+    const worker = new Worker(binUrl, {
+        argv: [options.source, "-o", options.output]
     });
 
     return new Promise((resolve, reject) => {

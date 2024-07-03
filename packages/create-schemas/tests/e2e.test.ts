@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import {
     createTemporaryFolder,
     dataFolder,
-    runCompiledBin
+    runCompiledBin,
 } from "./fixtures.ts";
 import { describe, test } from "vitest";
 import { join } from "node:path";
