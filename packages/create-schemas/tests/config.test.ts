@@ -16,7 +16,7 @@ describe.concurrent("config", () => {
             "-c",
             "config",
             "--cwd",
-            "cwd",
+            "cwd"
         ]);
         expect(config.input).toMatch("input");
         expect(config.output).toMatch("output");
@@ -30,7 +30,7 @@ describe.concurrent("config", () => {
 
             const config = await resolveConfig({
                 root: tempFolder,
-                input: "input",
+                input: "input"
             });
 
             expect(config.input).toMatch("input");
@@ -45,7 +45,7 @@ describe.concurrent("config", () => {
 
             const configFileContent = `export default ${JSON.stringify({
                 input,
-                output,
+                output
             } satisfies UserConfig)};`;
 
             await writeFile(configFilePath, configFileContent);
@@ -67,7 +67,7 @@ describe.concurrent("config", () => {
 
         test("inline config takes precedence over config file", async ({
             expect,
-            onTestFinished,
+            onTestFinished
         }) => {
             const tempFolder = await createTemporaryFolder({ onTestFinished });
 
@@ -75,14 +75,14 @@ describe.concurrent("config", () => {
 
             const configFileContent = `export default ${JSON.stringify({
                 input: "config-file-input",
-                output: "config-file-output",
+                output: "config-file-output"
             } satisfies UserConfig)};`;
 
             await writeFile(configFilePath, configFileContent);
 
             const config = await resolveConfig({
                 root: tempFolder,
-                input: "inline-input",
+                input: "inline-input"
             });
 
             expect(config.input).toMatch("inline-input");
