@@ -1,6 +1,7 @@
 ---
 icon: terminal
 label: CLI
+order: -200
 ---
 
 # Command Line Interface
@@ -14,6 +15,9 @@ create-schemas [input]
 ```
 
 #### Options
+
+Options passed to the CLI will always take precedence over options declared in
+the config file.
 
 | Options | Description |
 |-|-|

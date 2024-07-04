@@ -1,6 +1,7 @@
 ---
 icon: rocket
 label: Getting Started
+order: -100
 ---
 
 # Getting Started
@@ -23,7 +24,7 @@ pnpm add @workleap/create-schemas
 
 Create a `create-schemas.config.ts` file this this:
 
-```js
+```js create-schemas.config.ts
 import { defineConfig } from "@workleap/create-schemas";
 
 export default defineConfig({
