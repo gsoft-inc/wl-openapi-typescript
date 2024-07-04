@@ -6,7 +6,7 @@ import type { OpenAPITSOptions as OriginalOpenAPITSOptions } from "openapi-types
 
 const CONFIG_FILE_DEFAULT = "create-schemas.config";
 const OUTPUT_FILE_DEFAULT = "openapi-types.ts";
-const ROOT_DEFAULT = ".";
+const ROOT_DEFAULT = process.cwd();
 
 type OpenApiTsOptions = Omit<OriginalOpenAPITSOptions, "cwd" | "transform" | "postTransform" | "silent" | "version">;
 
@@ -38,10 +38,10 @@ export function parseArgs(argv?: string[]): InlineConfig {
         .name("create-schemas")
         .version(packageJson.version, "-v, --version", "display version number")
         .argument("[input]")
-        .option("-c, --config <file>", "use specified config file", CONFIG_FILE_DEFAULT)
+        .option("-c, --config <file>", "use specified config file")
         .option("-i, --input <path>", "path to the OpenAPI schema file")
-        .option("-o, --output <path>", "output file path", OUTPUT_FILE_DEFAULT)
-        .option("--cwd <path>", "path to working directory", ROOT_DEFAULT)
+        .option("-o, --output <path>", "output file path")
+        .option("--cwd <path>", "path to working directory")
         .helpOption("-h, --help", "display available CLI options")
         .parse(argv);
 
