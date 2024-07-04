@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`e2e > officevibe.yaml 1`] = `
+exports[`e2e > officevice.yaml 1`] = `
 "export interface paths {
     "/good-vibes-points/{userId}": {
         parameters: {

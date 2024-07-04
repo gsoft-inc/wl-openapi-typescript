@@ -1,7 +1,8 @@
 {
     "$schema": "https://json.schemastore.org/eslintrc",
     "root": true,
-    "extends": [
-      "plugin:@workleap/typescript-library"
-    ]
+    "extends": ["plugin:@workleap/typescript-library"],
+    "rules": {
+        "jest/no-deprecated-functions": "off" // This rule doesn't work because we're not using jest
+    }
 }

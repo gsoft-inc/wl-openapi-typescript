@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import {
     createTemporaryFolder,
     dataFolder,
-    runCompiledBin,
+    runCompiledBin
 } from "./fixtures.ts";
 import { describe, test } from "vitest";
 import { join } from "node:path";
@@ -11,11 +11,11 @@ const timeout = 30 * 1000; // 30 seconds
 
 describe.concurrent("e2e", () => {
     test(
-        "officevibe.yaml",
+        "officevice.yaml",
         async ({ expect, onTestFinished }) => {
             const tempFolder = await createTemporaryFolder({ onTestFinished });
 
-            const source = join(dataFolder, "officevibe.yaml");
+            const source = join(dataFolder, "officevice.yaml");
             const output = join(tempFolder, "output.ts");
 
             await runCompiledBin({ source, output });
