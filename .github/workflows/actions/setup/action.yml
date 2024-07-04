@@ -1,0 +1,38 @@
+name: Setup
+description: Setup node, pnpm, and install dependencies
+
+# Pnpm setup based on https://github.com/pnpm/action-setup#use-cache-to-reduce-installation-time
+
+runs:
+  using: "composite"
+  steps:
+  - uses: actions/checkout@v4
+
+  - name: Install pnpm
+    uses: pnpm/action-setup@v4
+    with:
+      version: 9
+      run_install: false
+
+  - name: Install Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version-file: ".nvmrc"
+      cache: "pnpm"
+
+  - name: Get pnpm store directory
+    shell: bash
+    run: |
+      echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+  - name: Setup pnpm cache
+    uses: actions/cache@v4
+    with:
+      path: ${{ env.STORE_PATH }}
+      key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      restore-keys: |
+        ${{ runner.os }}-pnpm-store-
+
+  - name: Install Dependencies
+    run: pnpm i --frozen-lockfile
+    shell: bash
