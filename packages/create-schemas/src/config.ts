@@ -62,6 +62,7 @@ export async function resolveConfig(inlineConfig: InlineConfig = {}): Promise<Re
     const { config } = await loadConfig<InlineConfig>({
         configFile,
         cwd: root,
+        rcFile: false,
         omit$Keys: true,
         defaultConfig: {
             configFile: CONFIG_FILE_DEFAULT,
