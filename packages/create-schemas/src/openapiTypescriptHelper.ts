@@ -6,12 +6,15 @@ import {
 } from "./astHelper.ts";
 import type { ResolvedConfig } from "./config.ts";
 import { pathToFileURL } from "url";
+import { join } from "path";
 
 export async function generateSchemas(config: ResolvedConfig): Promise<string> {
-    const base = pathToFileURL(config.root);
+    const url = URL.canParse(config.input)
+        ? config.input
+        : pathToFileURL(join(config.root, config.input));
 
     // Create a TypeScript AST from the OpenAPI schema
-    const ast = await openapiTS(new URL(config.input, base), {
+    const ast = await openapiTS(url, {
         ...config.openApiTsOptions,
         silent: true,
         cwd: config.root
