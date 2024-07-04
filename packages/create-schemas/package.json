@@ -17,6 +17,7 @@
     "bin": "./dist/bin.js",
     "scripts": {
         "dev": "tsup --config tsup.dev.ts",
+        "test": "vitest",
         "build": "tsup --config tsup.build.ts"
     },
     "devDependencies": {
@@ -27,7 +28,8 @@
         "@workleap/tsup-configs": "3.0.6",
         "eslint": "8.57.0",
         "tsup": "8.1.0",
-        "typescript": "5.4.5"
+        "typescript": "5.4.5",
+        "vitest": "1.6.0"
     },
     "engines": {
         "node": ">=18.0.0"
