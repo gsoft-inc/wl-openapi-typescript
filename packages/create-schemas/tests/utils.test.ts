@@ -99,20 +99,29 @@ describe.concurrent("utils", () => {
             expect(result).toBe("file:///C:/root/input");
         });
 
-        test("input as relative, root as absolute path", ({ expect }) => {
+        test("input as relative, root as absolute path", ({
+            expect,
+            onTestFinished,
+        }) => {
+            vi.spyOn(process, "cwd").mockImplementation(() => "/cwd");
+            onTestFinished(() => {
+                vi.resetAllMocks();
+            });
             const input = "input";
-            const root = "C:/root";
+            const root = "/root";
+
+            console.log(root);
 
             const result = toFullyQualifiedURL(input, root);
 
-            expect(result).toBe("file:///C:/root/input");
+            expect(result).toBe("file:///root/input");
         });
 
         test("input as relative, root as relative", ({
             expect,
             onTestFinished,
         }) => {
-            vi.spyOn(process, "cwd").mockImplementation(() => "C:/cwd");
+            vi.spyOn(process, "cwd").mockImplementation(() => "/cwd");
             onTestFinished(() => {
                 vi.resetAllMocks();
             });
@@ -122,7 +131,7 @@ describe.concurrent("utils", () => {
 
             const result = toFullyQualifiedURL(input, root);
 
-            expect(result).toBe("file:///C:/cwd/root/input");
+            expect(result).toBe("file:///cwd/root/input");
         });
     });
 });
