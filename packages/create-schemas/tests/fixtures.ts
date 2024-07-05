@@ -14,7 +14,7 @@ interface CreateTemporaryFolderOptions {
 }
 
 export async function createTemporaryFolder({
-    onTestFinished
+    onTestFinished,
 }: CreateTemporaryFolderOptions): Promise<string> {
     const id = crypto.randomUUID();
     const path = join(tempFolder, id);
@@ -28,13 +28,16 @@ export async function createTemporaryFolder({
 interface BinOptions {
     source: string;
     output: string;
+    cwd?: string;
 }
 
 export async function runCompiledBin(options: BinOptions): Promise<void> {
     const binUrl = new URL("../dist/bin.js", import.meta.url);
 
+    const cwdArgs = options.cwd ? ["--cwd", options.cwd] : [];
+
     const worker = new Worker(binUrl, {
-        argv: [options.source, "-o", options.output]
+        argv: [options.source, "-o", options.output, ...cwdArgs],
     });
 
     return new Promise((resolve, reject) => {

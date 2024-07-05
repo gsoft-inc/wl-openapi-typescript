@@ -3,12 +3,13 @@ import { loadConfig } from "c12";
 import * as z from "zod";
 import packageJson from "../package.json" with { type: "json" };
 import type { OpenAPITSOptions as OriginalOpenAPITSOptions } from "openapi-typescript";
+import { toFullyQualifiedURL } from "./utils.ts";
 
 const CONFIG_FILE_DEFAULT = "create-schemas.config";
 const OUTPUT_FILE_DEFAULT = "openapi-types.ts";
 const ROOT_DEFAULT = process.cwd();
 
-type OpenApiTsOptions = Omit<OriginalOpenAPITSOptions, "cwd" | "transform" | "postTransform" | "silent" | "version">;
+type OpenApiTsOptions = Omit<OriginalOpenAPITSOptions, "transform" | "postTransform" | "silent" | "version">;
 
 export interface UserConfig {
     root?: string;
@@ -26,6 +27,7 @@ const resolvedConfigSchema = z.object({
     root: z.string(),
     input: z.string(),
     output: z.string(),
+    watch: z.boolean().optional().default(false),
     openApiTsOptions: z.custom<OpenApiTsOptions>().optional().default({})
 });
 
@@ -41,6 +43,7 @@ export function parseArgs(argv?: string[]): InlineConfig {
         .option("-c, --config <file>", "use specified config file")
         .option("-i, --input <path>", "path to the OpenAPI schema file")
         .option("-o, --output <path>", "output file path")
+        .option("--watch", "watch for changes")
         .option("--cwd <path>", "path to working directory")
         .helpOption("-h, --help", "display available CLI options")
         .parse(argv);
@@ -73,6 +76,10 @@ export async function resolveConfig(inlineConfig: InlineConfig = {}): Promise<Re
     });
 
     const resolvedConfig = resolvedConfigSchema.parse(config);
+
+    resolvedConfig.root = toFullyQualifiedURL(root);
+    resolvedConfig.input = toFullyQualifiedURL(resolvedConfig.input, resolvedConfig.root);
+    resolvedConfig.output = toFullyQualifiedURL(resolvedConfig.output, resolvedConfig.root);
 
     return resolvedConfig;
 }

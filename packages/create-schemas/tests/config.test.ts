@@ -4,6 +4,7 @@ import { describe, test } from "vitest";
 import { join } from "node:path";
 import { parseArgs, resolveConfig, type UserConfig } from "../src/config.ts";
 import { ZodError } from "zod";
+import { pathToFileURL } from "node:url";
 
 describe.concurrent("config", () => {
     test("parseArgs", ({ expect }) => {
@@ -33,7 +34,9 @@ describe.concurrent("config", () => {
                 input: "input"
             });
 
-            expect(config.input).toMatch("input");
+            expect(config.input).toBe(
+                pathToFileURL(join(tempFolder, "input")).toString()
+            );
         });
 
         test("config file only", async ({ expect, onTestFinished }) => {
@@ -52,8 +55,8 @@ describe.concurrent("config", () => {
 
             const config = await resolveConfig({ root: tempFolder });
 
-            expect(config.input).toMatch(input);
-            expect(config.output).toMatch(output);
+            expect(config.input).toBe(pathToFileURL(input).toString());
+            expect(config.output).toBe(pathToFileURL(output).toString());
         });
 
         test("throw on invalid config", async ({ expect, onTestFinished }) => {
@@ -85,8 +88,12 @@ describe.concurrent("config", () => {
                 input: "inline-input"
             });
 
-            expect(config.input).toMatch("inline-input");
-            expect(config.output).toMatch("config-file-output");
+            expect(config.input).toBe(
+                pathToFileURL(join(tempFolder, "inline-input")).toString()
+            );
+            expect(config.output).toBe(
+                pathToFileURL(join(tempFolder, "config-file-output")).toString()
+            );
         });
     });
 });
