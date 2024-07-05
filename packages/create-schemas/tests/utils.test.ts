@@ -33,12 +33,17 @@ describe.concurrent("utils", () => {
             expect(result).toBe("file:///C:/input");
         });
 
-        test("input as absolute path", ({ expect }) => {
+        test("input as absolute path", ({ expect, onTestFinished }) => {
+            vi.spyOn(process, "cwd").mockImplementation(() => "/cwd");
+            onTestFinished(() => {
+                vi.resetAllMocks();
+            });
+
             const input = "/input";
 
             const result = toFullyQualifiedURL(input);
 
-            expect(result).toBe("file:///C:/input");
+            expect(result).toBe("file:///input");
         });
 
         test("input as relative path", ({ expect, onTestFinished }) => {
