@@ -106,7 +106,7 @@ describe.concurrent("utils", () => {
 
         test("input as relative, root as absolute path", ({
             expect,
-            onTestFinished,
+            onTestFinished
         }) => {
             vi.spyOn(process, "cwd").mockImplementation(() => "/cwd");
             onTestFinished(() => {
@@ -115,8 +115,6 @@ describe.concurrent("utils", () => {
             const input = "input";
             const root = "/root";
 
-            console.log(root);
-
             const result = toFullyQualifiedURL(input, root);
 
             expect(result).toBe("file:///root/input");
@@ -124,7 +122,7 @@ describe.concurrent("utils", () => {
 
         test("input as relative, root as relative", ({
             expect,
-            onTestFinished,
+            onTestFinished
         }) => {
             vi.spyOn(process, "cwd").mockImplementation(() => "/cwd");
             onTestFinished(() => {

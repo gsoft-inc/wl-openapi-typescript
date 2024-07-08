@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import {
     createTemporaryFolder,
     dataFolder,
-    runCompiledBin,
+    runCompiledBin
 } from "./fixtures.ts";
 import { describe, test } from "vitest";
 import { join } from "node:path";
@@ -15,7 +15,7 @@ describe.concurrent("e2e", () => {
         "officevice.yaml / file paths",
         async ({ expect, onTestFinished }) => {
             const tempFolder = await createTemporaryFolder({
-                onTestFinished,
+                onTestFinished
             });
 
             const source = join(dataFolder, "officevice.yaml");
@@ -34,7 +34,7 @@ describe.concurrent("e2e", () => {
         "officevice.yaml / file URLs",
         async ({ expect, onTestFinished }) => {
             const tempFolder = await createTemporaryFolder({
-                onTestFinished,
+                onTestFinished
             });
 
             const source = pathToFileURL(join(dataFolder, "officevice.yaml"));
@@ -42,7 +42,7 @@ describe.concurrent("e2e", () => {
 
             await runCompiledBin({
                 source: source.toString(),
-                output: output.toString(),
+                output: output.toString()
             });
 
             const result = await readFile(output, "utf-8");
@@ -56,7 +56,7 @@ describe.concurrent("e2e", () => {
         "officevice.yaml / relative path",
         async ({ expect, onTestFinished }) => {
             const tempFolder = await createTemporaryFolder({
-                onTestFinished,
+                onTestFinished
             });
 
             const source = "officevice.yaml";

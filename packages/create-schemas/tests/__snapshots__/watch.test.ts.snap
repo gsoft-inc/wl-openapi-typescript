@@ -1,0 +1,429 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`watch > petstore then todo 1`] = `
+"export interface paths {
+    "/pets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all pets */
+        get: operations["listPets"];
+        put?: never;
+        /** Create a pet */
+        post: operations["createPets"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pets/{petId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Info for a specific pet */
+        get: operations["showPetById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
+export type webhooks = Record<string, never>;
+export interface components {
+    schemas: {
+        Pet: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            tag?: string;
+        };
+        Pets: components["schemas"]["Pet"][];
+        Error: {
+            /** Format: int32 */
+            code: number;
+            message: string;
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
+}
+export type $defs = Record<string, never>;
+export interface operations {
+    listPets: {
+        parameters: {
+            query?: {
+                /** @description How many items to return at one time (max 100) */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A paged array of pets */
+            200: {
+                headers: {
+                    /** @description A link to the next page of responses */
+                    "x-next"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Pets"];
+                };
+            };
+            /** @description unexpected error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createPets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Null response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description unexpected error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    showPetById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The id of the pet to retrieve */
+                petId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Expected response to a valid request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Pet"];
+                };
+            };
+            /** @description unexpected error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+}
+export type Pet = components["schemas"]["Pet"];
+export type Pets = components["schemas"]["Pets"];
+export type Error = components["schemas"]["Error"];
+
+export type Endpoints = keyof paths;
+"
+`;
+
+exports[`watch > petstore then todo 2`] = `
+"export interface paths {
+    "/task": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the list of all tasks */
+        get: operations["tasksGetAll"];
+        put?: never;
+        /** Create a new task */
+        post: operations["tasksCreate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/task/{taskId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The id of the task
+                 * @example e1cb23d0-6cbe-4a29-b586-bfa424bc93fd
+                 */
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        /** Get a single task based on its id */
+        get: operations["tasksRead"];
+        /** Update an existing task */
+        put: operations["tasksUpdate"];
+        post?: never;
+        /** Delete an existing task */
+        delete: operations["tasksDelete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
+export type webhooks = Record<string, never>;
+export interface components {
+    schemas: {
+        /** @description Object representing a Task */
+        Task: {
+            /** @description indicates if a taks is completed or not */
+            completed?: boolean;
+            /**
+             * @description description of the task
+             * @example My important task
+             */
+            description: string;
+            /**
+             * @description id of the taks
+             * @example e1cb23d0-6cbe-4a29-b586-bfa424bc93fd
+             */
+            readonly id?: string;
+        };
+        /** @description Object representing an error */
+        Error: {
+            /**
+             * Format: int32
+             * @description Error code that identify of the error
+             * @example 1000
+             */
+            code?: number;
+            /**
+             * @description Short description of the error
+             * @example Could not perform the task
+             */
+            message?: string;
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
+}
+export type $defs = Record<string, never>;
+export interface operations {
+    tasksGetAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of all tasks */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Task"][];
+                };
+            };
+            /** @description Generic error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    tasksCreate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["Task"];
+            };
+        };
+        responses: {
+            /** @description The created task */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
+            };
+            /** @description Generic error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    tasksRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The id of the task
+                 * @example e1cb23d0-6cbe-4a29-b586-bfa424bc93fd
+                 */
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ok */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
+            };
+            /** @description Generic error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    tasksUpdate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The id of the task
+                 * @example e1cb23d0-6cbe-4a29-b586-bfa424bc93fd
+                 */
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["Task"];
+            };
+        };
+        responses: {
+            /** @description The updated task */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
+            };
+            /** @description Generic error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    tasksDelete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The id of the task
+                 * @example e1cb23d0-6cbe-4a29-b586-bfa424bc93fd
+                 */
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Task deleted response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Generic error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+}
+export type Task = components["schemas"]["Task"];
+export type Error = components["schemas"]["Error"];
+
+export type Endpoints = keyof paths;
+"
+`;
