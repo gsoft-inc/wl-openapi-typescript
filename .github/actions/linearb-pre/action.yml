@@ -1,0 +1,17 @@
+name: LinearB-Pre
+description: Prepare deployment data to LinearB
+
+# Based on https://github.com/gsoft-inc/wl-reusable-workflows/blob/main/.github/workflows/linearb-deployment.yml
+
+outputs:
+  timestamp:
+    description: The timestamp of the start of the workflow
+    value: ${{ steps.timestamp-build.outputs.timestamp }}
+
+runs:
+  using: "composite"
+  steps:
+  - name: Timestamp build
+    id: timestamp-build
+    shell: pwsh
+    run: echo "timestamp=$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')" >> $GITHUB_OUTPUT

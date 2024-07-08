@@ -19,6 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Pre LinearB
+        id: linearb-pre
+        uses: ./.github/actions/linearb-pre
+
       - name: Setup project
         uses: ./.github/actions/setup
 
@@ -30,3 +34,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.WORKLEAP_NPM_TOKEN }}
+      
+      - name: LinearB
+        if: ${{ steps.changesets.outputs.published == 'true' }}
+        uses: ./.github/actions/linearb-main
+        with:
+          environment: release
+          timestamp: ${{ steps.linearb-pre.outputs.timestamp }}
