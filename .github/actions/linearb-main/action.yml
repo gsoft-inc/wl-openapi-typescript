@@ -7,6 +7,9 @@ inputs:
   timestamp:
     description: The timestamp of the start of the workflow
     required: true
+  environment:
+    description: The deployment environment
+    required: true
 
 runs:
   using: "composite"
