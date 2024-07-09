@@ -98,12 +98,14 @@ function watchInput(watcher: Watcher, config: ResolvedConfig) {
         }
     }
 
-    inputWatcher.on("change", () => {
-        watcher.dispatch("change");
-        generate();
+    generate().then(() => {
+        inputWatcher.on("change", () => {
+            watcher.dispatch("change");
+            generate();
+        });
+
+        inputWatcher.on("add", () => generate());
     });
-    
-    inputWatcher.on("add", () => generate());
 
     watcher.once("stop", () => inputWatcher.close());
 }
