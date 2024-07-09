@@ -1,8 +1,7 @@
-import { readFile } from "node:fs/promises";
 import {
     createTemporaryFolder,
     dataFolder,
-    runCompiledBin,
+    runCompiledBin
 } from "./fixtures.ts";
 import { describe, test } from "vitest";
 import { join } from "node:path";
@@ -14,16 +13,12 @@ describe.concurrent("e2e", () => {
     test(
         "officevice.yaml / file paths",
         async ({ expect, onTestFinished }) => {
-            const tempFolder = await createTemporaryFolder({
-                onTestFinished,
+            const tempFolder = await createTemporaryFolder({ onTestFinished });
+
+            const result = await runCompiledBin({
+                source: join(dataFolder, "officevice.yaml"),
+                output: join(tempFolder, "output.ts")
             });
-
-            const source = join(dataFolder, "officevice.yaml");
-            const output = join(tempFolder, "output.ts");
-
-            await runCompiledBin({ source, output });
-
-            const result = await readFile(output, "utf-8");
 
             expect(result).toMatchSnapshot();
         },
@@ -33,19 +28,12 @@ describe.concurrent("e2e", () => {
     test(
         "officevice.yaml / file URLs",
         async ({ expect, onTestFinished }) => {
-            const tempFolder = await createTemporaryFolder({
-                onTestFinished,
+            const tempFolder = await createTemporaryFolder({ onTestFinished });
+
+            const result = await runCompiledBin({
+                source: pathToFileURL(join(dataFolder, "officevice.yaml")).toString(),
+                output: pathToFileURL(join(tempFolder, "output.ts")).toString()
             });
-
-            const source = pathToFileURL(join(dataFolder, "officevice.yaml"));
-            const output = pathToFileURL(join(tempFolder, "output.ts"));
-
-            await runCompiledBin({
-                source: source.toString(),
-                output: output.toString(),
-            });
-
-            const result = await readFile(output, "utf-8");
 
             expect(result).toMatchSnapshot();
         },
@@ -55,16 +43,13 @@ describe.concurrent("e2e", () => {
     test(
         "officevice.yaml / relative path",
         async ({ expect, onTestFinished }) => {
-            const tempFolder = await createTemporaryFolder({
-                onTestFinished,
+            const tempFolder = await createTemporaryFolder({ onTestFinished });
+
+            const result = await runCompiledBin({
+                cwd: dataFolder,
+                source: "officevice.yaml",
+                output: join(tempFolder, "output.ts")
             });
-
-            const source = "officevice.yaml";
-            const output = join(tempFolder, "output.ts");
-
-            await runCompiledBin({ cwd: dataFolder, source, output });
-
-            const result = await readFile(output, "utf-8");
 
             expect(result).toMatchSnapshot();
         },
@@ -76,12 +61,10 @@ describe.concurrent("e2e", () => {
         async ({ expect, onTestFinished }) => {
             const tempFolder = await createTemporaryFolder({ onTestFinished });
 
-            const source = join(dataFolder, "petstore.json");
-            const output = join(tempFolder, "output.ts");
-
-            await runCompiledBin({ source, output });
-
-            const result = await readFile(output, "utf-8");
+            const result = await runCompiledBin({
+                source: join(dataFolder, "petstore.json"),
+                output: join(tempFolder, "output.ts")
+            });
 
             expect(result).toMatchSnapshot();
         },
@@ -93,12 +76,10 @@ describe.concurrent("e2e", () => {
         async ({ expect, onTestFinished }) => {
             const tempFolder = await createTemporaryFolder({ onTestFinished });
 
-            const source = "https://petstore3.swagger.io/api/v3/openapi.json";
-            const output = join(tempFolder, "output.ts");
-
-            await runCompiledBin({ source, output });
-
-            const result = await readFile(output, "utf-8");
+            const result = await runCompiledBin({
+                source: "https://petstore3.swagger.io/api/v3/openapi.json", 
+                output: join(tempFolder, "output.ts")
+            });
 
             expect(result).toMatchSnapshot();
         },

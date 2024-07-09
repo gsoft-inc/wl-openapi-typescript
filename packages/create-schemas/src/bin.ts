@@ -24,7 +24,7 @@ try {
 
 function printConfigurationErrors(error: ZodError) {
     console.log("Invalid configuration:");
-    error.errors.forEach((issue) => {
+    error.errors.forEach(issue => {
         console.log(` - ${issue.path.join(".")}: ${issue.message}`);
     });
     console.log("Use --help to see available options.");
