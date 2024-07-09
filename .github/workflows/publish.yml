@@ -11,17 +11,14 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
     permissions:
       id-token: write # required for provenance https://docs.npmjs.com/generating-provenance-statements#publishing-packages-with-provenance-via-github-actions
       contents: write
       pull-requests: write
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Pre LinearB
-        id: linearb-pre
-        uses: ./.github/actions/linearb-pre
 
       - name: Setup project
         uses: ./.github/actions/setup
@@ -34,10 +31,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.WORKLEAP_NPM_TOKEN }}
-      
-      - name: LinearB
-        if: ${{ steps.changesets.outputs.published == 'true' }}
-        uses: ./.github/actions/linearb-main
-        with:
-          environment: release
-          timestamp: ${{ steps.linearb-pre.outputs.timestamp }}
+
+  linearb:
+    needs: [release]
+    if: ${{ needs.release.outputs.published == 'true' }}
+    uses: gsoft-inc/wl-reusable-workflows/.github/workflows/linearb-deployment.yml@main
+    with:
+      environment: 'release'
+    secrets: inherit
