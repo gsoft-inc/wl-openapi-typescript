@@ -1,8 +1,9 @@
 import { Worker } from "node:worker_threads";
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { OnTestFailedHandler } from "vitest";
+import { toFullyQualifiedURL } from "../src/utils.ts";
 
 const tempFolder = fileURLToPath(
     new URL("../node_modules/.tmp", import.meta.url)
@@ -28,17 +29,22 @@ export async function createTemporaryFolder({
 interface BinOptions {
     source: string;
     output: string;
+    cwd?: string;
 }
 
-export async function runCompiledBin(options: BinOptions): Promise<void> {
+export async function runCompiledBin(options: BinOptions): Promise<string> {
     const binUrl = new URL("../dist/bin.js", import.meta.url);
 
+    const cwdArgs = options.cwd ? ["--cwd", options.cwd] : [];
+
     const worker = new Worker(binUrl, {
-        argv: [options.source, "-o", options.output]
+        argv: [options.source, "-o", options.output, ...cwdArgs]
     });
 
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
         worker.on("exit", resolve);
         worker.on("error", reject);
     });
+
+    return readFile(new URL(toFullyQualifiedURL(options.output)), "utf8");
 }
