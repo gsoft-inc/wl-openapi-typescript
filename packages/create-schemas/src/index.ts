@@ -5,3 +5,4 @@ export {
     type InlineConfig,
     type ResolvedConfig
 } from "./config.ts";
+export { watch, type Watcher } from "./watch.ts";
