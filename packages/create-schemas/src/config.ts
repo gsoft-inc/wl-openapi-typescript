@@ -1,13 +1,15 @@
 import { Command } from "commander";
-import { loadConfig } from "c12";
+import { loadConfig, watchConfig as c12WatchConfig } from "c12";
 import * as z from "zod";
 import packageJson from "../package.json" with { type: "json" };
 import type { OpenAPITSOptions as OriginalOpenAPITSOptions } from "openapi-typescript";
 import { toFullyQualifiedURL } from "./utils.ts";
 
-const CONFIG_FILE_DEFAULT = "create-schemas.config";
-const OUTPUT_FILE_DEFAULT = "openapi-types.ts";
-const ROOT_DEFAULT = process.cwd();
+const DEFAULT_CONFIG: InlineConfig = {
+    configFile: "create-schemas.config",
+    output: "openapi-types.ts",
+    root: process.cwd()
+} as const;
 
 type OpenApiTsOptions = Omit<OriginalOpenAPITSOptions, "transform" | "postTransform" | "silent" | "version">;
 
@@ -15,6 +17,7 @@ export interface UserConfig {
     root?: string;
     input?: string;
     output?: string;
+    watch?: boolean;
     openApiTsOptions?: OpenApiTsOptions;
 }
 
@@ -55,29 +58,59 @@ export function parseArgs(argv?: string[]): InlineConfig {
         configFile: opts.config,
         root: opts.cwd,
         input: opts.input || args[0],
+        watch: opts.watch,
         output: opts.output
     };
 }
 
 export async function resolveConfig(inlineConfig: InlineConfig = {}): Promise<ResolvedConfig> {
-    const { configFile = CONFIG_FILE_DEFAULT, root = ROOT_DEFAULT } = inlineConfig;
+    const { configFile = DEFAULT_CONFIG.configFile, root = DEFAULT_CONFIG.root } = inlineConfig;
 
     const { config } = await loadConfig<InlineConfig>({
         configFile,
         cwd: root,
         rcFile: false,
         omit$Keys: true,
-        defaultConfig: {
-            configFile: CONFIG_FILE_DEFAULT,
-            root: ROOT_DEFAULT,
-            output: OUTPUT_FILE_DEFAULT
-        },
+        defaultConfig: DEFAULT_CONFIG,
         overrides: inlineConfig
     });
 
+    return validateConfig(config);
+}
+
+interface WatchConfigOptions {
+    inlineConfig?: InlineConfig;
+    onChange: (newConfig: ResolvedConfig) => void;
+    onValidationError?: (error: z.ZodError) => void;
+}
+
+export function watchConfig({ inlineConfig = {}, onChange, onValidationError }: WatchConfigOptions) {
+    const { configFile = DEFAULT_CONFIG.configFile, root = DEFAULT_CONFIG.root } = inlineConfig;
+
+    c12WatchConfig<InlineConfig>({
+        configFile,
+        cwd: root,
+        rcFile: false,
+        omit$Keys: true,
+        defaultConfig: DEFAULT_CONFIG,
+        overrides: inlineConfig,
+        onUpdate: ({ newConfig }) => {
+            try {
+                const resolvedConfig = validateConfig(newConfig.config);
+                onChange(resolvedConfig);
+            } catch (error) {
+                if (onValidationError && error instanceof z.ZodError) {
+                    onValidationError(error);
+                }
+            }
+        }
+    });
+}
+
+function validateConfig(config: InlineConfig): ResolvedConfig {
     const resolvedConfig = resolvedConfigSchema.parse(config);
 
-    resolvedConfig.root = toFullyQualifiedURL(root);
+    resolvedConfig.root = toFullyQualifiedURL(resolvedConfig.root);
     resolvedConfig.input = toFullyQualifiedURL(resolvedConfig.input, resolvedConfig.root);
     resolvedConfig.output = toFullyQualifiedURL(resolvedConfig.output, resolvedConfig.root);
 

@@ -5,6 +5,9 @@ import {
     getSchemaNames
 } from "./astHelper.ts";
 import type { ResolvedConfig } from "./config.ts";
+import { mkdir, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
 
 export async function generateSchemas(config: ResolvedConfig): Promise<string> {
     // Create a TypeScript AST from the OpenAPI schema
@@ -20,24 +23,16 @@ export async function generateSchemas(config: ResolvedConfig): Promise<string> {
     let contents = astToString(ast);
 
     // Re-export schemas types
-    console.log(`Exporting ${schemaNames.length} schemas.`);
     for (const schemaName of schemaNames) {
         contents += `${generateExportSchemaTypeDeclaration(schemaName)}\n`;
     }
 
     // Re-export endpoints keys
-    console.log("Exporting endpoints keys.");
     contents += `\n${generateExportEndpointsTypeDeclaration()}\n`;
 
-    if (schemaNames.length === 0) {
-        console.warn(
-            `⚠️ Suspiciously no schemas where found in the OpenAPI document at ${config.input}. It might due to a flag converting interface to type which is not supported at the moment. ⚠️`
-        );
-    } else {
-        console.log(
-            `OpenAPI TypeScript types have been generated successfully at ${config.output}! 🎉`
-        );
-    }
+    // Write the files
+    await mkdir(dirname(fileURLToPath(config.output)), { recursive: true });
+    await writeFile(fileURLToPath(config.output), contents);
 
     return contents;
 }
