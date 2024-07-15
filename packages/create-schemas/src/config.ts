@@ -4,20 +4,35 @@ import * as z from "zod";
 import packageJson from "../package.json" with { type: "json" };
 import type { OpenAPITSOptions as OriginalOpenAPITSOptions } from "openapi-typescript";
 import { toFullyQualifiedURL } from "./utils.ts";
+import type { Plugin } from "./plugins/plugin.ts";
+import { headerPlugin } from "./plugins/header-plugin.ts";
+import { typesPlugin } from "./plugins/types-plugin.ts";
+import { openapiTypeScriptPlugin } from "./plugins/openapi-typescript-plugin.ts";
 
 const DEFAULT_CONFIG: InlineConfig = {
     configFile: "create-schemas.config",
-    output: "openapi-types.ts",
+    outdir: "dist",
     root: process.cwd()
 } as const;
+
+const DEFAULT_PLUGINS_PRE = [
+    openapiTypeScriptPlugin(),
+    typesPlugin()
+];
+
+const DEFAULT_PLUGINS_POST = [
+    headerPlugin()
+];
 
 type OpenApiTsOptions = Omit<OriginalOpenAPITSOptions, "transform" | "postTransform" | "silent" | "version">;
 
 export interface UserConfig {
     root?: string;
     input?: string;
-    output?: string;
+    outdir?: string;
     watch?: boolean;
+    plugins?: Plugin[];
+    emit?: boolean;
     openApiTsOptions?: OpenApiTsOptions;
 }
 
@@ -25,11 +40,20 @@ export interface InlineConfig extends UserConfig {
     configFile?: string;
 }
 
+const pluginSchema = z.object({
+    name: z.string(),
+    buildStart: z.custom<Plugin["buildStart"]>().optional(),
+    transform: z.custom<Plugin["transform"]>().optional(),
+    buildEnd: z.custom<Plugin["buildEnd"]>().optional()
+});
+
 const resolvedConfigSchema = z.object({
     configFile: z.string(),
     root: z.string(),
     input: z.string(),
-    output: z.string(),
+    outdir: z.string(),
+    plugins: z.array(pluginSchema).optional().default([]),
+    emit: z.boolean().optional().default(true),
     watch: z.boolean().optional().default(false),
     openApiTsOptions: z.custom<OpenApiTsOptions>().optional().default({})
 });
@@ -45,7 +69,7 @@ export function parseArgs(argv?: string[]): InlineConfig {
         .argument("[input]")
         .option("-c, --config <file>", "use specified config file")
         .option("-i, --input <path>", "path to the OpenAPI schema file")
-        .option("-o, --output <path>", "output file path")
+        .option("-o, --outdir <path>", "output directory")
         .option("--watch", "watch for changes")
         .option("--cwd <path>", "path to working directory")
         .helpOption("-h, --help", "display available CLI options")
@@ -59,7 +83,7 @@ export function parseArgs(argv?: string[]): InlineConfig {
         root: opts.cwd,
         input: opts.input || args[0],
         watch: opts.watch,
-        output: opts.output
+        outdir: opts.outdir
     };
 }
 
@@ -94,9 +118,9 @@ export function watchConfig({ inlineConfig = {}, onChange, onValidationError }: 
         omit$Keys: true,
         defaultConfig: DEFAULT_CONFIG,
         overrides: inlineConfig,
-        onUpdate: ({ newConfig }) => {
+        onUpdate: async ({ newConfig }) => {
             try {
-                const resolvedConfig = validateConfig(newConfig.config);
+                const resolvedConfig = await validateConfig(newConfig.config);
                 onChange(resolvedConfig);
             } catch (error) {
                 if (onValidationError && error instanceof z.ZodError) {
@@ -107,12 +131,14 @@ export function watchConfig({ inlineConfig = {}, onChange, onValidationError }: 
     });
 }
 
-function validateConfig(config: InlineConfig): ResolvedConfig {
+async function validateConfig(config: InlineConfig): Promise<ResolvedConfig> {
     const resolvedConfig = resolvedConfigSchema.parse(config);
+
+    resolvedConfig.plugins = [...DEFAULT_PLUGINS_PRE, ...resolvedConfig.plugins, ...DEFAULT_PLUGINS_POST];
 
     resolvedConfig.root = toFullyQualifiedURL(resolvedConfig.root);
     resolvedConfig.input = toFullyQualifiedURL(resolvedConfig.input, resolvedConfig.root);
-    resolvedConfig.output = toFullyQualifiedURL(resolvedConfig.output, resolvedConfig.root);
+    resolvedConfig.outdir = toFullyQualifiedURL(resolvedConfig.outdir, resolvedConfig.root);
 
     return resolvedConfig;
 }

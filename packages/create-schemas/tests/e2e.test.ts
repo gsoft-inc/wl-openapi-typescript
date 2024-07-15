@@ -3,7 +3,7 @@ import {
     dataFolder,
     runCompiledBin
 } from "./fixtures.ts";
-import { describe, test } from "vitest";
+import { assert, describe, test } from "vitest";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -17,10 +17,12 @@ describe.concurrent("e2e", () => {
 
             const result = await runCompiledBin({
                 source: join(dataFolder, "officevice.yaml"),
-                output: join(tempFolder, "output.ts")
+                outdir: tempFolder
             });
 
-            expect(result).toMatchSnapshot();
+            const typesFile = result.find(file => file.filename === "types.ts");
+            assert(typesFile);
+            expect(typesFile.code).toMatchSnapshot(); 
         },
         timeout
     );
@@ -32,10 +34,12 @@ describe.concurrent("e2e", () => {
 
             const result = await runCompiledBin({
                 source: pathToFileURL(join(dataFolder, "officevice.yaml")).toString(),
-                output: pathToFileURL(join(tempFolder, "output.ts")).toString()
+                outdir: tempFolder
             });
 
-            expect(result).toMatchSnapshot();
+            const typesFile = result.find(file => file.filename === "types.ts");
+            assert(typesFile);
+            expect(typesFile.code).toMatchSnapshot(); 
         },
         timeout
     );
@@ -48,10 +52,12 @@ describe.concurrent("e2e", () => {
             const result = await runCompiledBin({
                 cwd: dataFolder,
                 source: "officevice.yaml",
-                output: join(tempFolder, "output.ts")
+                outdir: tempFolder
             });
 
-            expect(result).toMatchSnapshot();
+            const typesFile = result.find(file => file.filename === "types.ts");
+            assert(typesFile);
+            expect(typesFile.code).toMatchSnapshot(); 
         },
         timeout
     );
@@ -63,10 +69,12 @@ describe.concurrent("e2e", () => {
 
             const result = await runCompiledBin({
                 source: join(dataFolder, "petstore.json"),
-                output: join(tempFolder, "output.ts")
+                outdir: tempFolder
             });
 
-            expect(result).toMatchSnapshot();
+            const typesFile = result.find(file => file.filename === "types.ts");
+            assert(typesFile);
+            expect(typesFile.code).toMatchSnapshot(); 
         },
         timeout
     );
@@ -78,10 +86,12 @@ describe.concurrent("e2e", () => {
 
             const result = await runCompiledBin({
                 source: "https://petstore3.swagger.io/api/v3/openapi.json", 
-                output: join(tempFolder, "output.ts")
+                outdir: tempFolder
             });
 
-            expect(result).toMatchSnapshot();
+            const typesFile = result.find(file => file.filename === "types.ts");
+            assert(typesFile);
+            expect(typesFile.code).toMatchSnapshot();
         },
         timeout
     );

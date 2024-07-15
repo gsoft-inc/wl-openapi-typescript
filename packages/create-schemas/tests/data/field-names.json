@@ -1,0 +1,30 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Forbidden Name",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "string"
+      },
+      "User_1": {
+        "type": "string"
+      },
+      "User_Name": {
+        "type": "string"
+      },
+      "user-name": {
+        "type": "string"
+      },
+      "my.org.User": {
+        "type": "string"
+      }
+    }
+  }
+}
