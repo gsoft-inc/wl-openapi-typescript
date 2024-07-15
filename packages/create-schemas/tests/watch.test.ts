@@ -22,9 +22,13 @@ describe("watch", () => {
         assert(typesFile);
         expect(typesFile.code).toMatchSnapshot();
 
+        // Create delay to ensure the file system watcher is ready
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         // 2nd output
+        const promise = new Promise<GenerationResult>(resolve => watcher.once("done", resolve));
         await copyFile(join(dataFolder, "todo.json"), input);
-        result = await new Promise<GenerationResult>(resolve => watcher.once("done", resolve));
+        result = await promise;
         typesFile = result.files.find(file => file.filename === "types.ts");
         assert(typesFile);
         expect(typesFile.code).toMatchSnapshot();
