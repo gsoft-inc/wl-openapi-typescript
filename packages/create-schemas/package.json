@@ -33,7 +33,6 @@
     "devDependencies": {
         "@swc/helpers": "0.5.11",
         "@types/node": "20.14.1",
-        "@types/prompts": "^2.4.9",
         "@workleap/eslint-plugin": "3.2.2",
         "@workleap/swc-configs": "2.2.3",
         "@workleap/tsup-configs": "3.0.6",
@@ -50,7 +49,6 @@
         "commander": "12.1.0",
         "kleur": "4.1.5",
         "openapi-typescript": "7.0.2",
-        "prompts": "2.4.2",
         "typescript": "5.5.3",
         "zod": "3.23.8"
     }
