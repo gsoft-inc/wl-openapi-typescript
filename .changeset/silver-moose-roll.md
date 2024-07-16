@@ -2,4 +2,5 @@
 "@workleap/create-schemas": minor
 ---
 
-Add client plugin
+Add `openapiFetchPlugin` plugin for client generation (requires `openapi-fetch`
+package)
