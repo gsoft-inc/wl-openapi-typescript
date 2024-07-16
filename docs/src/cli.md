@@ -1,7 +1,7 @@
 ---
 icon: terminal
 label: CLI
-order: -200
+order: -2
 ---
 
 # Command Line Interface
@@ -24,6 +24,7 @@ the config file.
 | `-v, --version` | Display version number |
 | `-c, --config <file>` | Use specified config file (default: `"create-schemas.config"`) |
 | `-i, --input <path>` | Path to the OpenAPI schema file |
-| `-o, --output <path>` | Output file path (default: `"openapi-types.ts"`)
-| `--cwd <path>` | Path to working directory (default: `"."`)
-| `-h, --help` | Display available CLI options
+| `-o, --outdir <path>` | Output directory (default: `"./dist"`) |
+| `--cwd <path>` | Path to working directory (default: `"."`) |
+| `--watch` | Enable watch mode |
+| `-h, --help` | Display available CLI options |

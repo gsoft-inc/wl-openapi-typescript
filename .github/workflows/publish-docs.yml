@@ -1,0 +1,38 @@
+name: Publish Docs
+
+on:
+  push:
+    branches:
+    - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup project
+        uses: ./.github/actions/setup
+
+      - name: Build with Retype
+        uses: retypeapp/action-build@latest
+        id: retype
+        with:
+          config: docs/retype.yaml
+          license: ${{ secrets.RETYPE_API_KEY }}
+
+      - name: Upload Retype artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: github-pages
+          path: ${{ steps.retype.outputs.retype-output-path }}
+      
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

@@ -27,12 +27,6 @@ importers:
         specifier: 5.5.3
         version: 5.5.3
 
-  apps/docs:
-    dependencies:
-      retypeapp:
-        specifier: ^3.5.0
-        version: 3.5.0
-
   debug:
     dependencies:
       '@workleap/create-schemas':
@@ -41,6 +35,12 @@ importers:
       openapi-fetch:
         specifier: ^0.10.2
         version: 0.10.2
+
+  docs:
+    dependencies:
+      retypeapp:
+        specifier: 3.5.0
+        version: 3.5.0
 
   packages/create-schemas:
     dependencies:

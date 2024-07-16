@@ -1,7 +1,7 @@
 ---
 icon: gear
 label: Configuration
-order: -300
+order: -3
 ---
 
 When running `create-schemas` from the command line, it will automatically try
@@ -37,11 +37,17 @@ Project root directory used to resolve relative paths. Can be an absolute path, 
 
 Path to the OpenAPI schema file. Can be a local path or URL to a remote file.
 
-### output
+### outdir
 - **Type:** `string`
-- **Default:** `"openapi-types.ts"`
+- **Default:** `"./dist"`
 
-Output file path.
+Output directory path.
+
+### watch
+- **Type:** `boolean`
+- **Default:** `false`
+
+Enable watch mode.
 
 ### openApiTsOptions
 
