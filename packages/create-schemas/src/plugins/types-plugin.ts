@@ -4,7 +4,10 @@ import ts from "typescript";
 import type { Plugin } from "./plugin.ts";
 import { openapiTypeScriptId } from "./openapi-typescript-plugin.ts";
 
-export const RESERVED_IDENTIFIERS = new Set(["paths", "webhooks", "components", "$defs", "operations"]);
+const componentsIdentifier = "components";
+const schemasIdentifier = "schemas";
+
+export const RESERVED_IDENTIFIERS = new Set(["paths", "webhooks", componentsIdentifier, "$defs", "operations"]);
 
 export function typesPlugin(): Plugin {
     return {
@@ -35,7 +38,7 @@ export function typesPlugin(): Plugin {
                         return name;
                     }
                 })
-                .map(name => `export type ${toSafeName(name)} = components["schemas"]["${name}"];`)
+                .map(name => `export type ${toSafeName(name)} = ${componentsIdentifier}["${schemasIdentifier}"]["${name}"];`)
                 .flatMap(stringToAST) as ts.Node[];
 
             const endpointsDeclaration = stringToAST("export type Endpoints = keyof paths;") as ts.Node[];
@@ -48,13 +51,13 @@ export function typesPlugin(): Plugin {
 }
 
 export function isComponentsInterfaceDeclaration(node: ts.Node): node is ts.InterfaceDeclaration {
-    return ts.isInterfaceDeclaration(node) && node.name.text === "components";
+    return ts.isInterfaceDeclaration(node) && node.name.text === componentsIdentifier;
 }
 
 export function isComponentsSchema(node: ts.Node): node is ts.PropertySignature {
     return ts.isPropertySignature(node) 
     && (ts.isIdentifier(node.name) || ts.isStringLiteral(node.name))
-    && node.name.text === "schemas";
+    && node.name.text === schemasIdentifier;
 }
 
 
