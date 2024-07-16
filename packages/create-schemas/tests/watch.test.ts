@@ -4,6 +4,7 @@ import { assert, describe, test } from "vitest";
 import { join } from "node:path";
 import { watch } from "../src/watch.ts";
 import type { GenerationResult } from "../src/generate.ts";
+import { openapiTypeScriptFilename } from "../src/plugins/openapi-typescript-plugin.ts";
 
 describe("watch", () => {
     test("changing the input", async ({ expect, onTestFinished }) => {
@@ -18,7 +19,7 @@ describe("watch", () => {
         // 1st output
         await copyFile(join(dataFolder, "petstore.json"), input);
         let result = await new Promise<GenerationResult>(resolve => watcher.once("done", resolve));
-        let typesFile = result.files.find(file => file.filename === "types.ts");
+        let typesFile = result.files.find(file => file.filename === openapiTypeScriptFilename);
         assert(typesFile);
         expect(typesFile.code).toMatchSnapshot();
 
@@ -29,7 +30,7 @@ describe("watch", () => {
         const promise = new Promise<GenerationResult>(resolve => watcher.once("done", resolve));
         await copyFile(join(dataFolder, "todo.json"), input);
         result = await promise;
-        typesFile = result.files.find(file => file.filename === "types.ts");
+        typesFile = result.files.find(file => file.filename === openapiTypeScriptFilename);
         assert(typesFile);
         expect(typesFile.code).toMatchSnapshot();
     });

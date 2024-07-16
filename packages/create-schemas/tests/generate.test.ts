@@ -3,6 +3,7 @@ import { generate } from "../src/generate.ts";
 import { resolveConfig } from "../src/config.ts";
 import { join } from "path";
 import { dataFolder } from "./fixtures.ts";
+import { openapiTypeScriptFilename } from "../src/plugins/openapi-typescript-plugin.ts";
 
 describe.concurrent("generate", () => {
     test("sanitize names", async ({ expect }) => {
@@ -10,7 +11,7 @@ describe.concurrent("generate", () => {
             input: join(dataFolder, "field-names.json")
         }));
 
-        const typesFile = files.find(file => file.filename === "types.ts");
+        const typesFile = files.find(file => file.filename === openapiTypeScriptFilename);
 
         assert(typesFile);
 

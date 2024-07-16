@@ -2,7 +2,7 @@
 import { assert, describe, expect, test } from "vitest";
 import { headerPlugin } from "../src/plugins/header-plugin.ts";
 import { typesPlugin } from "../src/plugins/types-plugin.ts";
-import { openapiTypeScriptId } from "../src/plugins/openapi-typescript-plugin.ts";
+import { openapiTypeScriptId, openapiTypeScriptFilename } from "../src/plugins/openapi-typescript-plugin.ts";
 import { resolveConfig } from "../src/config.ts";
 
 describe.concurrent("plugins", () => {
@@ -15,7 +15,7 @@ describe.concurrent("plugins", () => {
             config: await resolveConfig({ input: "openapi.json" }),
             id: openapiTypeScriptId,
             code: "function foo() {}",
-            filename: "types.ts",
+            filename: openapiTypeScriptFilename,
             emitFile: () => void 0
         });
 
@@ -44,7 +44,7 @@ describe.concurrent("plugins", () => {
                 "my.org.User": string;
               }
             }`,
-            filename: "types.ts",
+            filename: openapiTypeScriptFilename,
             emitFile: () => void 0
         });
 

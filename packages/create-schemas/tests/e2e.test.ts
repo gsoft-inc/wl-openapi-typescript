@@ -6,6 +6,7 @@ import {
 import { assert, describe, test } from "vitest";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { openapiTypeScriptFilename } from "../src/plugins/openapi-typescript-plugin.ts";
 
 const timeout = 30 * 1000; // 30 seconds
 
@@ -20,7 +21,7 @@ describe.concurrent("e2e", () => {
                 outdir: tempFolder
             });
 
-            const typesFile = result.find(file => file.filename === "types.ts");
+            const typesFile = result.find(file => file.filename === openapiTypeScriptFilename);
             assert(typesFile);
             expect(typesFile.code).toMatchSnapshot(); 
         },
@@ -37,7 +38,7 @@ describe.concurrent("e2e", () => {
                 outdir: tempFolder
             });
 
-            const typesFile = result.find(file => file.filename === "types.ts");
+            const typesFile = result.find(file => file.filename === openapiTypeScriptFilename);
             assert(typesFile);
             expect(typesFile.code).toMatchSnapshot(); 
         },
@@ -55,7 +56,7 @@ describe.concurrent("e2e", () => {
                 outdir: tempFolder
             });
 
-            const typesFile = result.find(file => file.filename === "types.ts");
+            const typesFile = result.find(file => file.filename === openapiTypeScriptFilename);
             assert(typesFile);
             expect(typesFile.code).toMatchSnapshot(); 
         },
@@ -72,7 +73,7 @@ describe.concurrent("e2e", () => {
                 outdir: tempFolder
             });
 
-            const typesFile = result.find(file => file.filename === "types.ts");
+            const typesFile = result.find(file => file.filename === openapiTypeScriptFilename);
             assert(typesFile);
             expect(typesFile.code).toMatchSnapshot(); 
         },
@@ -89,7 +90,7 @@ describe.concurrent("e2e", () => {
                 outdir: tempFolder
             });
 
-            const typesFile = result.find(file => file.filename === "types.ts");
+            const typesFile = result.find(file => file.filename === openapiTypeScriptFilename);
             assert(typesFile);
             expect(typesFile.code).toMatchSnapshot();
         },

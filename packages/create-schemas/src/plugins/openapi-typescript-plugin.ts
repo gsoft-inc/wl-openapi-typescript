@@ -3,6 +3,8 @@ import type { Plugin } from "./plugin.ts";
 
 export const openapiTypeScriptId = Symbol();
 
+export const openapiTypeScriptFilename = "types.ts";
+
 export function openapiTypeScriptPlugin(): Plugin {
     return {
         name: "internal:openapi-typescript-plugin",
@@ -14,7 +16,7 @@ export function openapiTypeScriptPlugin(): Plugin {
 
             emitFile({
                 id: openapiTypeScriptId,
-                filename: "types.ts",
+                filename: openapiTypeScriptFilename,
                 code: astToString(ast)
             });
         }
