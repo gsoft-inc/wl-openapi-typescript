@@ -31,4 +31,14 @@ describe.concurrent("generate", () => {
 
         expect(fn).rejects.toThrow();
     });
+
+    test("reject invalid names", async ({ expect }) => {
+        const fn = async () => {
+            await generate(await resolveConfig({
+                input: join(dataFolder, "invalid-name.json")
+            }));
+        };
+
+        expect(fn).rejects.toThrow();
+    });
 });

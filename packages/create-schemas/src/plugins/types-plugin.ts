@@ -34,9 +34,13 @@ export function typesPlugin(): Plugin {
                 .map(name => {
                     if (RESERVED_IDENTIFIERS.has(name)) {
                         throw new Error(`Invalid schema name: ${name}`);
-                    } else {
-                        return name;
                     }
+
+                    if (toSafeName(name).length === 0) {
+                        throw new Error(`Invalid schema name: ${name}`);
+                    }
+
+                    return name;
                 })
                 .map(name => `export type ${toSafeName(name)} = ${componentsIdentifier}["${schemasIdentifier}"]["${name}"];`)
                 .flatMap(stringToAST) as ts.Node[];
@@ -59,7 +63,6 @@ export function isComponentsSchema(node: ts.Node): node is ts.PropertySignature 
     && (ts.isIdentifier(node.name) || ts.isStringLiteral(node.name))
     && node.name.text === schemasIdentifier;
 }
-
 
 /**
  * OpenAPI field names must match `^[a-zA-Z0-9\.\-_]+$` which allows names that
