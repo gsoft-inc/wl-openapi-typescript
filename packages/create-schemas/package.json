@@ -38,6 +38,7 @@
     },
     "devDependencies": {
         "@swc/helpers": "0.5.11",
+        "@types/json-schema": "7.0.15",
         "@types/node": "20.14.1",
         "@workleap/eslint-plugin": "3.2.2",
         "@workleap/swc-configs": "2.2.3",
@@ -50,12 +51,16 @@
         "node": ">=18.0.0"
     },
     "dependencies": {
+        "@apidevtools/json-schema-ref-parser": "^11.6.4",
+        "@apidevtools/swagger-parser": "^10.1.0",
+        "@stoplight/http-spec": "^7.1.0",
         "c12": "1.11.1",
         "chokidar": "3.6.0",
         "commander": "12.1.0",
         "kleur": "4.1.5",
         "openapi-typescript": "7.0.2",
         "typescript": "5.5.3",
+        "yaml": "^2.4.5",
         "zod": "3.23.8"
     }
 }

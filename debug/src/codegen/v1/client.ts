@@ -2,4 +2,4 @@
 import type { paths } from "./types.ts";
 import _createClient from "openapi-fetch";
 
-export const createClient = _createClient as typeof _createClient<paths, "application/json">;
+export const createClient = _createClient as typeof _createClient<paths>;

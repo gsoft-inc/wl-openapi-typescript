@@ -1,14 +1,11 @@
-import { createClient } from "./codegen/v1/client.ts";
+import { GetGoodVibesPoint, WorkleapClient } from "./codegen/v1/wl-client.ts";
 
-const client = createClient({ baseUrl: "https://api.example.com" });
+const client = new WorkleapClient();
 
-const { data, error } = await client.GET("/good-vibes-points/{userId}", { params: { path: { userId: "123" } } });
+const { data, error } = await GetGoodVibesPoint(client, { path: { userId: "1" } });
 
 if (error) {
-    console.error(error.title);
-    console.error(error.detail);
+    throw new Error(error.title);
 }
 
-if (data?.point) {
-    console.log(`You have ${data.point} good vibes points!`);
-}
+console.log(`You have ${data.point} good vibes points!`);

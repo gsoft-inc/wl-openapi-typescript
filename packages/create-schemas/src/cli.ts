@@ -83,7 +83,10 @@ function printError(error: unknown) {
         printConfigurationErrors(error);
     } else {
         console.log(red("✖ Failed to generate schemas."));
-        console.log(red(String(error))); 
+        console.log(red(String(error)));
+        if (error instanceof Error && error.stack) {
+            console.log(dim(error.stack));
+        }
     }
 }
 
