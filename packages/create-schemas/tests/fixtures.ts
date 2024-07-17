@@ -1,9 +1,10 @@
 import { Worker } from "node:worker_threads";
-import { mkdir, readFile, rm } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { OnTestFailedHandler } from "vitest";
 import { toFullyQualifiedURL } from "../src/utils.ts";
+import type { GenerationFile } from "../src/generate.ts"; 
 
 const tempFolder = fileURLToPath(
     new URL("../node_modules/.tmp", import.meta.url)
@@ -28,17 +29,17 @@ export async function createTemporaryFolder({
 
 interface BinOptions {
     source: string;
-    output: string;
+    outdir: string;
     cwd?: string;
 }
 
-export async function runCompiledBin(options: BinOptions): Promise<string> {
+export async function runCompiledBin(options: BinOptions): Promise<GenerationFile[]> {
     const binUrl = new URL("../dist/bin.js", import.meta.url);
 
     const cwdArgs = options.cwd ? ["--cwd", options.cwd] : [];
 
     const worker = new Worker(binUrl, {
-        argv: [options.source, "-o", options.output, ...cwdArgs]
+        argv: [options.source, "-o", options.outdir, ...cwdArgs]
     });
 
     await new Promise((resolve, reject) => {
@@ -46,5 +47,15 @@ export async function runCompiledBin(options: BinOptions): Promise<string> {
         worker.on("error", reject);
     });
 
-    return readFile(new URL(toFullyQualifiedURL(options.output)), "utf8");
+    const outdir = fileURLToPath(toFullyQualifiedURL(options.outdir));
+
+    const filenames = await readdir(outdir);
+    const files = await Promise.all(
+        filenames.map(async filename => ({
+            filename,
+            code: await readFile(join(outdir, filename), "utf8")
+        } satisfies GenerationFile))
+    );
+    
+    return files;
 }

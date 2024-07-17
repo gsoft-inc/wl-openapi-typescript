@@ -6,14 +6,16 @@ import {
     type ResolvedConfig
 } from "./config.ts";
 import { watch as fsWatch } from "chokidar";
-import { generateSchemas } from "./openapiTypescriptHelper.ts";
+import { generate, type GenerationResult } from "./generate.ts";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 interface WatcherEventMap {
     start: () => void;
     change: () => void;
     stop: () => void;
     configChanged: (newConfig: ResolvedConfig) => void;
-    done: (result: string) => void;
+    done: (result: GenerationResult) => void;
     error: (error: unknown) => void;
 }
 
@@ -88,23 +90,27 @@ function watchInput(watcher: Watcher, config: ResolvedConfig) {
 
     const inputWatcher = fsWatch(fileURLToPath(config.input));
 
-    async function generate() {
+    async function _generate() {
         try {
             watcher.dispatch("start");
-            const contents = await generateSchemas(config);
-            watcher.dispatch("done", contents);
+            const result = await generate(config);
+            await mkdir(fileURLToPath(config.outdir), { recursive: true });
+            await Promise.all(result.files.map(async file => {
+                return writeFile(join(fileURLToPath(config.outdir), file.filename), file.code);
+            }));
+            watcher.dispatch("done", result);
         } catch (e) {
             watcher.dispatch("error", e);
         }
     }
 
-    generate().then(() => {
+    _generate().then(() => {
         inputWatcher.on("change", () => {
             watcher.dispatch("change");
-            generate();
+            _generate();
         });
 
-        inputWatcher.on("add", () => generate());
+        inputWatcher.on("add", () => _generate());
     });
 
     watcher.once("stop", () => inputWatcher.close());

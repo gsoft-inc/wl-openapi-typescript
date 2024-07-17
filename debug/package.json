@@ -1,16 +1,12 @@
 {
   "name": "debug",
+  "type": "module",
   "private": true,
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "run": "create-schemas args1 args2"
+    "dev": "create-schemas"
   },
-  "devDependencies": {
-    "@workleap/create-schemas": "workspace:*"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "@workleap/create-schemas": "workspace:*",
+    "openapi-fetch": "^0.10.2"
+  }
 }

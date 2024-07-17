@@ -1,5 +1,6 @@
-import { isAbsolute, join } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import ts from "typescript";
 
 function isFileURLAsText(input: string | URL): input is `file://${string}` {
     return typeof input === "string" && input.startsWith("file://");
@@ -86,4 +87,40 @@ export function formatBytes(bytes: number) {
     const gb = mb / 1024;
 
     return `${gb.toFixed(2)} GB`;
+}
+
+export function getTsCompilerOptions(): ts.CompilerOptions {
+    const configFilePath = ts.findConfigFile(process.cwd(), ts.sys.fileExists);
+
+    if (!configFilePath) {
+        return ts.getDefaultCompilerOptions();
+    }
+
+    const configFile = ts.readConfigFile(configFilePath, ts.sys.readFile);
+    const config = ts.parseJsonConfigFileContent(
+        configFile.config,
+        ts.sys,
+        dirname(configFilePath)
+    );
+
+    return config.options;
+}
+
+export function getRelativeModuleResolutionExtension() {
+    const compilerOptions = getTsCompilerOptions();
+
+    if (compilerOptions.allowImportingTsExtensions) {
+        return ".ts";
+    }
+
+    switch (compilerOptions.moduleResolution) {
+        case ts.ModuleResolutionKind.NodeNext:
+        case ts.ModuleResolutionKind.Node16:
+            return ".js";
+        default:
+        case ts.ModuleResolutionKind.Classic:
+        case ts.ModuleResolutionKind.Node10:
+        case ts.ModuleResolutionKind.Bundler:
+            return "";
+    }
 }

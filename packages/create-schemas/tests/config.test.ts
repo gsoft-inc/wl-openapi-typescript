@@ -20,7 +20,7 @@ describe.concurrent("config", () => {
             "cwd"
         ]);
         expect(config.input).toMatch("input");
-        expect(config.output).toMatch("output");
+        expect(config.outdir).toMatch("output");
         expect(config.configFile).toMatch("config");
         expect(config.root).toMatch("cwd");
     });
@@ -48,7 +48,7 @@ describe.concurrent("config", () => {
 
             const configFileContent = `export default ${JSON.stringify({
                 input,
-                output
+                outdir: output
             } satisfies UserConfig)};`;
 
             await writeFile(configFilePath, configFileContent);
@@ -56,7 +56,7 @@ describe.concurrent("config", () => {
             const config = await resolveConfig({ root: tempFolder });
 
             expect(config.input).toBe(pathToFileURL(input).toString());
-            expect(config.output).toBe(pathToFileURL(output).toString());
+            expect(config.outdir).toBe(pathToFileURL(output).toString());
         });
 
         test("throw on invalid config", async ({ expect, onTestFinished }) => {
@@ -78,7 +78,7 @@ describe.concurrent("config", () => {
 
             const configFileContent = `export default ${JSON.stringify({
                 input: "config-file-input",
-                output: "config-file-output"
+                outdir: "config-file-output"
             } satisfies UserConfig)};`;
 
             await writeFile(configFilePath, configFileContent);
@@ -91,7 +91,7 @@ describe.concurrent("config", () => {
             expect(config.input).toBe(
                 pathToFileURL(join(tempFolder, "inline-input")).toString()
             );
-            expect(config.output).toBe(
+            expect(config.outdir).toBe(
                 pathToFileURL(join(tempFolder, "config-file-output")).toString()
             );
         });

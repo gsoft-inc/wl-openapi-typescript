@@ -6,3 +6,4 @@ export {
     type ResolvedConfig
 } from "./config.ts";
 export { watch, type Watcher } from "./watch.ts";
+export { generate } from "./generate.ts";
