@@ -26,9 +26,8 @@ jobs:
           license: ${{ secrets.RETYPE_API_KEY }}
 
       - name: Upload Retype artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-pages-artifact@v2
         with:
-          name: github-pages
           path: ${{ steps.retype.outputs.retype-output-path }}
       
       - name: Deploy to GitHub Pages
