@@ -22,34 +22,42 @@ You can use the `defineConfig` helper which should provide intellisense:
 import { defineConfig } from '@workleap/create-schemas'
 
 export default defineConfig({
-  // ...
+  // example
 })
 ```
 
-### root
+## root
 - **Type:** `string`
 - **Default:** `process.cwd()`
 
 Project root directory used to resolve relative paths. Can be an absolute path, or a path relative to the current working directory.
 
-### input
+## input
 - **Type:** `string`
 
 Path to the OpenAPI schema file. Can be a local path or URL to a remote file.
 
-### outdir
+## outdir
 - **Type:** `string`
 - **Default:** `"./dist"`
 
-Output directory path.
+Output directory path. The files that will be generated in this directory
+depends on the plugins being used.
 
-### watch
+## watch
 - **Type:** `boolean`
 - **Default:** `false`
 
-Enable watch mode.
+Enable watch mode. Watch mode will regenerate the code whenever the input file
+or the configuration file changes.
 
-### openApiTsOptions
+## plugins
+- **Type:** `Plugin[]`
+- **Default:** `[]`
+
+Array of plugins to use. See [Using Plugins](./using-plugins) for more details.
+
+## openApiTsOptions
 
 - **Type:** `OpenApiTsOptions`
 - **Default:** `{}`
