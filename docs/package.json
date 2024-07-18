@@ -1,0 +1,11 @@
+{
+  "name": "docs",
+  "private": true,
+  "scripts": {
+    "dev": "retype start",
+    "build": "retype build"
+  },
+  "dependencies": {
+    "retypeapp": "3.5.0"
+  }
+}

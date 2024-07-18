@@ -1,0 +1,34 @@
+# -------------------
+# Retype
+# -------------------
+
+poweredByRetype: false
+
+input: ./src
+output: ./dist
+
+url: https://gsoft-inc.github.io/wl-openapi-typescript/
+
+branding:
+    title: OpenAPI TS
+    logo: ./resources/logo.png
+
+favicon: ./resources/favicon.png
+
+edit:
+    repo: https://github.com/gsoft-inc/wl-openapi-typescript
+    base: ./apps/docs/src
+    branch: main
+
+footer:
+    copyright: "&copy; Copyright {{ year }} - Workleap"
+
+toc:
+    depth: 2
+
+hub:
+    link: https://gsoft-inc.github.io/wl-idp-docs-hub/
+    alt: Workleap's IDP homepage
+
+start:
+    pro: true

@@ -1,3 +1,4 @@
 packages:
   - "debug"
+  - "docs"
   - "packages/*"
