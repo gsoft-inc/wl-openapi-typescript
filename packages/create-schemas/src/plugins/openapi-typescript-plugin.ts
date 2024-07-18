@@ -1,7 +1,7 @@
 import openapiTS, { astToString } from "openapi-typescript";
 import type { Plugin } from "./plugin.ts";
 
-export const openapiTypeScriptId = Symbol();
+export const openapiTypeScriptId = "internal:openapi-typescript-plugin";
 
 export const openapiTypeScriptFilename = "types.ts";
 
