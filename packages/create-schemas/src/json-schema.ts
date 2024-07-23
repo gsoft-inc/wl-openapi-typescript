@@ -1,33 +1,35 @@
-import type { JSONSchema7 } from "json-schema";
+import type { JSONSchema7, JSONSchema7Type } from "json-schema";
 import ts from "typescript";
 
 /**
  * Ref: https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01
  */
 export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
-    if (typeof schema === "boolean") {
-        throw new Error("Boolean schema is not supported");
+    if (schema === true) {
+        return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+    } 
+    
+    if (schema === false) {
+        return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NeverKeyword);
     }
 
-    if (schema.$ref !== undefined) {
-        const identifer = refToIdentifier(schema.$ref);
-
-        return ts.factory.createTypeReferenceNode(identifer);
+    if (schema.const) {
+        return literalValueToTypeScriptAST(schema.const);
     }
 
-    if (schema.oneOf !== undefined) {
-        const typeNodes = schema.oneOf.map(toTypeScriptAST);
-
-        return ts.factory.createUnionTypeNode(typeNodes);
+    if (schema.$ref) {
+        return ts.factory.createTypeReferenceNode(refToIdentifier(schema.$ref));
     }
 
-    if (schema.allOf !== undefined) {
-        const typeNodes = schema.allOf.map(toTypeScriptAST);
-
-        return ts.factory.createIntersectionTypeNode(typeNodes);
+    if (schema.oneOf) {
+        return ts.factory.createUnionTypeNode(schema.oneOf.map(toTypeScriptAST));
     }
 
-    if (schema.anyOf !== undefined) {
+    if (schema.allOf) {
+        return ts.factory.createIntersectionTypeNode(schema.allOf.map(toTypeScriptAST));
+    }
+
+    if (schema.anyOf) {
         const typeNodes = schema.anyOf.map(toTypeScriptAST);
 
         const combinations = [];
@@ -42,164 +44,171 @@ export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
         return ts.factory.createUnionTypeNode([...typeNodes, ...combinations]);
     }
 
-    if ("type" in schema) {
+    // This is an OpenAPI extension on top of JSON Schema
+    if ("nullable" in schema && schema.nullable === true) {
+        const nonNullableSchema = { ...schema };
+
+        delete nonNullableSchema.nullable;
+
+        return ts.factory.createUnionTypeNode([
+            toTypeScriptAST(nonNullableSchema),
+            ts.factory.createLiteralTypeNode(ts.factory.createNull())
+        ]);
+    }
+
+    if (schema.type) {
         if (Array.isArray(schema.type)) {
-            for (const type of schema.type) {
-                return toTypeScriptAST({ ...schema, type });
+            return ts.factory.createUnionTypeNode(schema.type.map(type => toTypeScriptAST({ ...schema, type })));
+        }
+
+        if (typeof schema.type === "object" && "$ref" in schema.type) {
+            return toTypeScriptAST(schema.type);
+        }
+
+        // Ref: https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6.5
+        if (schema.type === "object") {
+            const propertySignatures = Object.entries(schema.properties ?? {}).map(([name, property]) => {
+                const modifiers: ts.Modifier[] = [];
+                if (schema.readOnly === true) {
+                    modifiers.push(ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword));
+                }
+
+                const propertySignature = ts.factory.createPropertySignature(
+                    modifiers,
+                    isUnsafeName(name) ? ts.factory.createStringLiteral(name) : name,
+                    isRequiredProperty(schema, name) ? undefined : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+                    toTypeScriptAST(property)
+                );
+
+                if (typeof property === "object") {
+                    annotate(propertySignature, property);
+                }
+
+                return propertySignature;
+            });
+
+            if (schema.additionalProperties) {
+                const additionalProperties = ts.factory.createTypeReferenceNode(
+                    "Record",
+                    [
+                        ts.factory.createUnionTypeNode([ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword)]),
+                        toTypeScriptAST(schema.additionalProperties)
+                    ]
+                );
+
+                if (propertySignatures.length === 0) {
+                    return additionalProperties;
+                } else {
+                    return ts.factory.createIntersectionTypeNode([
+                        ts.factory.createTypeLiteralNode(propertySignatures),
+                        additionalProperties
+                    ]);
+                }
             }
+
+            if (propertySignatures.length === 0) {
+                // Empty object "{}" is the shorthand for `any` type in OpenAPI
+                return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+            } else {
+                return ts.factory.createTypeLiteralNode(propertySignatures);
+            }
+        }
+
+        // Ref: https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6.4
+        if (schema.type === "array") {
+            if (schema.items) {
+                if (Array.isArray(schema.items)) {
+                    return ts.factory.createArrayTypeNode(
+                        ts.factory.createTupleTypeNode(
+                            schema.items.map(toTypeScriptAST)
+                        )
+                    );
+                } else {
+                    return ts.factory.createArrayTypeNode(toTypeScriptAST(schema.items));
+                }
+            } else {
+                return ts.factory.createArrayTypeNode(
+                    ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
+                );
+            }
+        }
+    
+        if (schema.type === "string") {
+            if (schema.enum) {
+                return enumToTypeScriptAST(schema.enum);
+            }
+
+            return ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
+        }
+    
+        if (schema.type === "integer" || schema.type === "number") {
+            if (schema.enum) {
+                return enumToTypeScriptAST(schema.enum);
+            }
+ 
+            return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
+        }
+    
+        if (schema.type === "boolean") {
+            if (schema.enum) {
+                return enumToTypeScriptAST(schema.enum);
+            }
+ 
+            return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword);
         }
 
         if (schema.type === "null") {
             return ts.factory.createLiteralTypeNode(ts.factory.createNull());
         }
-
-        // Ref: https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6.5
-        if (schema.type === "object") {
-            const properties = schema.properties || {};
-    
-            const propertySignatures = Object.keys(properties).map(name => {
-                const property = properties[name];
-
-                if (typeof property === "boolean") {
-                    throw new Error("Boolean schema is not supported");
-                }
-
-                const propertyType = toTypeScriptAST(property);
-
-                const modifiers: ts.Modifier[] = [];
-
-                if (schema.readOnly === true) {
-                    modifiers.push(ts.factory.createModifier(ts.SyntaxKind.ReadonlyKeyword));
-                }
-
-                const optional = schema.required && !schema.required.includes(name);
-
-                const propertySignature = ts.factory.createPropertySignature(
-                    modifiers,
-                    isUnsafeName(name) ? ts.factory.createStringLiteral(name) : name,
-                    optional
-                        ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
-                        : undefined,
-                    propertyType
-                );
-    
-                annotate(propertySignature, property);
-    
-                return propertySignature;
-            });
-    
-            return ts.factory.createTypeLiteralNode(propertySignatures);
-        }
-    
-        if (schema.type === "string") {
-            const typeNodes = [];
-            if (schema.enum) {
-                for (const literalValue of schema.enum) {
-                    typeNodes.push(
-                        ts.factory.createLiteralTypeNode(
-                            ts.factory.createStringLiteral(literalValue as string)
-                        )
-                    );
-                }
-            } else {
-                typeNodes.push(
-                    ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword)
-                );
-            }
-    
-            if (typeNodes.length === 1) {
-                return typeNodes[0];
-            } else {
-                return ts.factory.createUnionTypeNode(typeNodes);
-            }
-        }
-    
-        if (schema.type === "integer" || schema.type === "number") {
-            const typeNodes = [];
-    
-            if (schema.enum) {
-                for (const numericLiteral of schema.enum) {
-                    typeNodes.push(
-                        ts.factory.createLiteralTypeNode(
-                            ts.factory.createNumericLiteral(numericLiteral as number)
-                        )
-                    );
-                }
-            } else {
-                typeNodes.push(
-                    ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword)
-                );
-            }
-    
-            if (typeNodes.length === 1) {
-                return typeNodes[0];
-            } else {
-                return ts.factory.createUnionTypeNode(typeNodes);
-            }
-        }
-    
-        if (schema.type === "boolean") {
-            const typeNodes = [];
-    
-            if (schema.enum) {
-                for (const booleanLiteral of schema.enum) {
-                    if (booleanLiteral === true) {
-                        typeNodes.push(
-                            ts.factory.createLiteralTypeNode(ts.factory.createTrue())
-                        );
-                    }
-    
-                    if (booleanLiteral === false) {
-                        typeNodes.push(
-                            ts.factory.createLiteralTypeNode(ts.factory.createFalse())
-                        );
-                    }
-                }
-            } else {
-                typeNodes.push(
-                    ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword)
-                );
-            }
-    
-            if (typeNodes.length === 1) {
-                return typeNodes[0];
-            } else {
-                return ts.factory.createUnionTypeNode(typeNodes);
-            }
-        }
-    
-        // Ref: https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01#section-6.4
-        if (schema.type === "array") {
-            if (schema.items) {
-                if (Array.isArray(schema.items)) {
-                    const itemTypes = schema.items.map(toTypeScriptAST);
-
-                    return ts.factory.createArrayTypeNode(ts.factory.createTupleTypeNode(itemTypes));
-                } else {
-                    const itemType = toTypeScriptAST(schema.items);
-
-                    return ts.factory.createArrayTypeNode(itemType);
-                }
-            } else {
-                return ts.factory.createArrayTypeNode(
-                    ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
-                );
-            }
-        }
     }
 
-    throw new Error(`Unsupported type: ${schema.type} from schema: ${JSON.stringify(schema)}`);
+    return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+}
+
+function literalValueToTypeScriptAST(literalValue: JSONSchema7Type): ts.TypeNode {
+    if (literalValue === null) {
+        return ts.factory.createLiteralTypeNode(ts.factory.createNull());
+    } else if (typeof literalValue === "boolean") {
+        return ts.factory.createLiteralTypeNode(
+            literalValue ? ts.factory.createTrue() : ts.factory.createFalse()
+        );
+    } else if (typeof literalValue === "object") {
+        throw new Error("Object literal as enum is not supported");
+    } else if (typeof literalValue === "number") {
+        return ts.factory.createLiteralTypeNode(
+            ts.factory.createNumericLiteral(literalValue)
+        );
+    } else if (typeof literalValue === "string") {
+        return ts.factory.createLiteralTypeNode(
+            ts.factory.createStringLiteral(literalValue)
+        );
+    }
+    throw new Error(`Unsupported enum value: ${literalValue}`);
+}
+
+function enumToTypeScriptAST(enumerable: JSONSchema7Type[]): ts.TypeNode {
+    const nodes = enumerable.map(literalValueToTypeScriptAST);
+
+    if (nodes.length === 0) {
+        return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NeverKeyword);
+    } else if (nodes.length === 1) {
+        return nodes[0];
+    } else {
+        return ts.factory.createUnionTypeNode(nodes);
+    }
 }
 
 /** Adds properties of schema to the type node as comment. */
 export function annotate(typeNode: ts.Node, schema: JSONSchema7, ...additionalComments: string[]) {
     const comments: string[] = [...additionalComments.flatMap(comment => comment.split("\n"))];
+
     if (schema.description) {
         comments.push(schema.description);
-    }
-    if ("summary" in schema && typeof schema.summary === "string") {
+    } else if ("summary" in schema && typeof schema.summary === "string") {
+        // Only use summary as a fallback if description is not present
         comments.push(schema.summary);
     }
+
     if (schema.format) {
         comments.push(`@format \`${schema.format}\``);
     }
@@ -270,17 +279,63 @@ export function toSafeName(unsafeName: string): string {
 }
 
 export function isUnsafeName(unsafeName: string): boolean {
-    return !/^[a-zA-Z0-9\\.\-_]+$/.test(unsafeName);
+    return toSafeName(unsafeName) !== unsafeName;
+}
+
+function isRequiredProperty(schema: JSONSchema7, propertyName: string): boolean {
+    if ("nullable" in schema && schema.nullable === true) {
+        return false;
+    }
+
+    if (schema.required && schema.required.includes(propertyName)) {
+        return true;
+    }
+
+    return false;
 }
 
 export function refToIdentifier(ref: string) {
+    const parts = refToPath(ref);
+
+    if (parts.length === 0) {
+        throw new Error(`Invalid ref: ${ref}`);
+    }
+
+    const lastPart = parts[parts.length - 1];
+
+    return toSafeName(lastPart);
+}
+
+export function refToPath(ref: string): string[] {
     const [protocol, ...parts] = ref.split("/");
 
     if (protocol !== "#") {
         throw new Error(`Unsupported protocol: "${protocol}" in ref "${ref}"`);
     }
 
-    const name = parts.pop()!;
+    return parts;
+}
 
-    return toSafeName(name);
+export function printAST(node: ts.Node | ts.Node[]) {
+    const resultFile = ts.createSourceFile(
+        "",
+        "",
+        ts.ScriptTarget.Latest,
+        false,
+        ts.ScriptKind.TS
+    );
+  
+    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+  
+    if (Array.isArray(node)) {
+        const formatted = node.flatMap(n => [n, ts.factory.createIdentifier("\n") ]);
+
+        return printer.printList(
+            ts.ListFormat.MultiLine,
+            ts.factory.createNodeArray(formatted, undefined),
+            resultFile
+        );
+    }
+  
+    return printer.printNode(ts.EmitHint.Unspecified, node, resultFile);
 }

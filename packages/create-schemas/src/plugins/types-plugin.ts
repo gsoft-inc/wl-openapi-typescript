@@ -2,7 +2,6 @@ import ts from "typescript";
 import * as JSONSchema from "../json-schema.ts";
 import type { Plugin } from "./plugin.ts";
 import { getDocument } from "./wl-client-plugin/wl-client-plugin.ts";
-import { astToString } from "openapi-typescript";
 import type { JSONSchema7 } from "json-schema";
 
 
@@ -17,7 +16,7 @@ export function typesPlugin(): Plugin {
             if (ast.length > 0) {
                 emitFile({
                     filename: "types.ts",
-                    code: astToString(ast)
+                    code: JSONSchema.printAST(ast)
                 });
             }
         }

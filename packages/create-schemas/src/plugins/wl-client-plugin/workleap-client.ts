@@ -17,9 +17,8 @@ export interface WorkleapClientResponseError<T> {
 
 export type WorkleapClientResponse<D, E> = WorkleapClientResponseData<D> | WorkleapClientResponseError<E>;
 
-
 export class WorkleapClient {
-    async fetch(url: string, init: WorkleapClientInit): Promise<WorkleapClientResponse<any, any>> {
+    async fetch(url: string, init: WorkleapClientInit = {}): Promise<WorkleapClientResponse<any, any>> {
         const requestInit = init.request ?? {};
         
         let parsedUrl = url;

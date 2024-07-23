@@ -3,7 +3,7 @@ import type { Plugin } from "./plugin.ts";
 
 export const openapiTypeScriptId = "internal:openapi-typescript-plugin";
 
-export const openapiTypeScriptFilename = "types.ts";
+export const openapiTypeScriptFilename = "openapi-types.ts";
 
 export function openapiTypeScriptPlugin(): Plugin {
     return {

@@ -4,7 +4,6 @@ import type { Plugin } from "../plugin.ts";
 import { readFile } from "fs/promises";
 import YAML from "yaml";
 import * as JSONSchema from "../../json-schema.ts";
-import { astToString } from "openapi-typescript";
 import ts from "typescript";
 import { code as baseCode } from "./workleap-client.ts";
 import type { JSONSchema7 } from "json-schema";
@@ -24,7 +23,7 @@ export function clientPlugin(): Plugin {
 
                 emitFile({
                     filename: "wl-client.ts",
-                    code: baseCode + "\n" + code + "\n" + astToString(types)
+                    code: baseCode + "\n" + code + "\n" + JSONSchema.printAST(types)
                 });
             }
         }
@@ -145,15 +144,17 @@ function operationsToClient(operations: Operation[]): string {
         let initRequired = false;
         if (operation.request) {
             const request = operation.request;
-            const bodyContent = request.body?.contents?.find((_content: any) => _content.mediaType === mediaType);
             const requestProperties: ts.PropertySignature[] = [];
-
-            if (bodyContent?.schema) {
-                const bodyType = JSONSchema.toTypeScriptAST(bodyContent?.schema);
+            
+            
+            const match = Object.keys(request.body?.content ?? {}).find(contentType => contentType === mediaType);
+            if (request.body && match) {
+                const bodyContent = request.body.content[match];
+                const bodyType = JSONSchema.toTypeScriptAST(bodyContent.schema);
                 requestProperties.push(
                     ts.factory.createPropertySignature(undefined, "body", undefined, bodyType)
                 );
-                initRequired = true;
+                initRequired = true; 
             }
 
             let pathRequired = false;
@@ -225,11 +226,11 @@ function operationsToClient(operations: Operation[]): string {
         }
 
         if (successTypes.length === 0) {
-            successTypes.push(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword));
+            successTypes.push(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword));
         }
 
         if (errorTypes.length === 0) {
-            errorTypes.push(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword));
+            errorTypes.push(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword));
         }
 
         const functionNode = ts.factory.createFunctionDeclaration(
@@ -281,7 +282,7 @@ function operationsToClient(operations: Operation[]): string {
         ast.push(functionNode); 
     }
 
-    return astToString(ast);
+    return JSONSchema.printAST(ast);
 }
 
 function toMethodName(operation: Operation) {
