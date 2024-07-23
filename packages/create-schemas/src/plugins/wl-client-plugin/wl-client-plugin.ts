@@ -1,14 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fileURLToPath } from "url";
 import type { Plugin } from "../plugin.ts";
-import { dereference } from "@apidevtools/json-schema-ref-parser";
 import { readFile } from "fs/promises";
 import YAML from "yaml";
-import { transformOas3Operations } from "@stoplight/http-spec/oas3";
-import { toSafeName } from "../types-plugin.ts";
-import { JSONSchemaToTypeScriptAST } from "./json-schema.ts";
+import * as JSONSchema from "../../json-schema.ts";
 import { astToString } from "openapi-typescript";
 import ts from "typescript";
 import { code as baseCode } from "./workleap-client.ts";
+import type { JSONSchema7 } from "json-schema";
+import { documentToTypeNodes } from "../types-plugin.ts";
 
 export function clientPlugin(): Plugin {
     return {
@@ -16,20 +16,23 @@ export function clientPlugin(): Plugin {
         async buildStart({ config, emitFile }) {
             const url = new URL(config.input);
             const document = await getDocument(url);
-            const schema = await dereference(document);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const operations = transformOas3Operations(schema as any);
-            const code = operationsToClient(operations);
-            emitFile({
-                filename: "wl-client.ts",
-                code: baseCode + "\n" + code
-            });
+            const operations = getOperations(document);
+            
+            if (operations.length > 0) {
+                const code = operationsToClient(operations);
+                const types = documentToTypeNodes(document);
+
+                emitFile({
+                    filename: "wl-client.ts",
+                    code: baseCode + "\n" + code + "\n" + astToString(types)
+                });
+            }
         }
     };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getDocument(url: URL): Promise<any> {
+export async function getDocument(url: URL): Promise<any> {
     if (url.protocol === "http:" || url.protocol === "https:") {
         const response = await fetch(url);
 
@@ -43,24 +46,110 @@ async function getDocument(url: URL): Promise<any> {
     }
 }
 
-type IHTTPOperation = ReturnType<typeof transformOas3Operations>[number];
 
 const mediaType = "application/json";
 
-function operationsToClient(operations: IHTTPOperation[]): string {
+interface Operation {
+    path: string;
+    method: string;
+    tags: string[];
+    summary?: string;
+    description?: string;
+    operationId?: string;
+    request?: OperationRequest;
+    responses: OperationResponse[];
+    deprecated: boolean;
+}
+
+interface OperationRequest {
+    path: any[];
+    query: any[];
+    header: any[];
+    cookie: any[];
+    body?: any;
+}
+
+interface OperationResponse {
+    description: string;
+    contents: OperationResponseContent[];
+    statusCode: number | "default";
+}
+
+interface OperationResponseContent {
+    mediaType: string;
+    schema: JSONSchema7;
+}
+
+const METHODS = ["get", "post", "put", "patch", "delete", "head", "options", "trace"];
+
+function getOperations(document: any): Operation[] {
+    if ("paths" in document === false || typeof document.paths !== "object") {
+        return [];
+    }
+
+    const paths = document.paths;
+    const operations: Operation[] = [];
+    for (const path of Object.keys(paths)) {
+        const methods = Object.keys(paths[path]).filter(method => METHODS.includes(method));
+        const pathParameters = paths[path].parameters ?? [];
+        for (const method of methods) {
+            const operation = paths[path][method];
+            const parameters = [...pathParameters, ...operation.parameters ?? []];
+
+            operations.push({
+                path,
+                method,
+                tags: operation.tags ?? [],
+                summary: operation.summary,
+                description: operation.description,
+                operationId: operation.operationId,
+                request: {
+                    path: parameters.filter((param: any) => param.in === "path"),
+                    query: parameters.filter((param: any) => param.in === "query"),
+                    header: parameters.filter((param: any) => param.in === "header"),
+                    cookie: parameters.filter((param: any) => param.in === "cookie"),
+                    body: operation.requestBody
+                },
+                responses: Object.keys(operation.responses ?? {}).map(statusCode => {
+                    const responseObj = operation.responses[statusCode];
+
+                    return {
+                        statusCode: statusCode === "default" ? "default" : Number(statusCode),
+                        description: responseObj.description,
+                        contents: Object.keys(responseObj.content ?? {}).map(mediaType => ({
+                            mediaType,
+                            schema: responseObj.content[mediaType].schema
+                        }))
+                    };
+                }),
+                deprecated: operation.deprecated ?? false
+            });
+        }
+    }
+
+    return operations;
+}
+
+function operationsToClient(operations: Operation[]): string {
     const ast: ts.Node[] = [];
     for (const operation of operations) {
         const name = toMethodName(operation);
+
+        const importedTypes = new Set<string>();
+
+        const types = {
+            init: capitalize(name) + "Init"
+        };
 
         // ====== Request ======
         let initRequired = false;
         if (operation.request) {
             const request = operation.request;
-            const bodyContent = operation.request.body?.contents?.find(_content => _content.mediaType === mediaType);
+            const bodyContent = request.body?.contents?.find((_content: any) => _content.mediaType === mediaType);
             const requestProperties: ts.PropertySignature[] = [];
 
             if (bodyContent?.schema) {
-                const bodyType = JSONSchemaToTypeScriptAST(bodyContent?.schema);
+                const bodyType = JSONSchema.toTypeScriptAST(bodyContent?.schema);
                 requestProperties.push(
                     ts.factory.createPropertySignature(undefined, "body", undefined, bodyType)
                 );
@@ -69,16 +158,16 @@ function operationsToClient(operations: IHTTPOperation[]): string {
 
             let pathRequired = false;
             const pathProperties: ts.PropertySignature[] = [];
-            for (const item of request.path ?? []) {
+            for (const item of request.path) {
                 const questionToken = item.required ? undefined : ts.factory.createToken(ts.SyntaxKind.QuestionToken);
-                pathProperties.push(
-                    ts.factory.createPropertySignature(
-                        undefined,
-                        item.name,
-                        questionToken,
-                        ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword)
-                    )
+                const property = ts.factory.createPropertySignature(
+                    undefined,
+                    item.name,
+                    questionToken,
+                    ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword)
                 );
+                JSONSchema.annotate(property, item);
+                pathProperties.push(property);
                 if (!questionToken) {
                     pathRequired = true;
                     initRequired = true;
@@ -98,7 +187,7 @@ function operationsToClient(operations: IHTTPOperation[]): string {
 
             const interfaceNode = ts.factory.createInterfaceDeclaration(
                 [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-                name + "Init",
+                types.init,
                 undefined,
                 [ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
                     ts.factory.createExpressionWithTypeArguments(ts.factory.createIdentifier("WorkleapClientInit"), undefined)]
@@ -114,65 +203,33 @@ function operationsToClient(operations: IHTTPOperation[]): string {
         const successTypes = [];
         const errorTypes = [];
         for (const response of operation.responses) {
-            const content = response.contents?.find(_content => _content.mediaType === mediaType);
+            const content = response.contents.find(_content => _content.mediaType === mediaType);
             if (!content) {
                 continue;
             }
 
             if (content.schema) {
-                const typeNode = JSONSchemaToTypeScriptAST(content.schema);
-                if (response.code === "default" || (Number(response.code) >= 200 && Number(response.code) < 300)) {
+                const typeNode = JSONSchema.toTypeScriptAST(content.schema);
+                if (response.statusCode === "default") {
+                    errorTypes.push(typeNode);
+                } else if (response.statusCode >= 200 && response.statusCode < 300) {
                     successTypes.push(typeNode);
                 } else {
                     errorTypes.push(typeNode);
                 }
+
+                if (ts.isIdentifier(typeNode)) {
+                    importedTypes.add(typeNode.text);
+                }
             }
         }
 
-        if (successTypes.length === 1) {
-            ast.push(ts.factory.createTypeAliasDeclaration(
-                [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-                name + "Result",
-                undefined,
-                successTypes[0]
-            ));
-        } else if (successTypes.length > 1) {
-            ast.push(ts.factory.createTypeAliasDeclaration(
-                [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-                name + "Result",
-                undefined,
-                ts.factory.createUnionTypeNode(successTypes)
-            ));
-        } else {
-            ast.push(ts.factory.createTypeAliasDeclaration(
-                [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-                name + "Result",
-                undefined,
-                ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword)
-            ));
+        if (successTypes.length === 0) {
+            successTypes.push(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword));
         }
 
-        if (errorTypes.length === 1) {
-            ast.push(ts.factory.createTypeAliasDeclaration(
-                [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-                name + "Error",
-                undefined,
-                errorTypes[0]
-            ));
-        } else if (successTypes.length > 1) {
-            ast.push(ts.factory.createTypeAliasDeclaration(
-                [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-                name + "Error",
-                undefined,
-                ts.factory.createUnionTypeNode(errorTypes)
-            ));
-        } else {
-            ast.push(ts.factory.createTypeAliasDeclaration(
-                [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-                name + "Error",
-                undefined,
-                ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword)
-            ));
+        if (errorTypes.length === 0) {
+            errorTypes.push(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword));
         }
 
         const functionNode = ts.factory.createFunctionDeclaration(
@@ -193,14 +250,14 @@ function operationsToClient(operations: IHTTPOperation[]): string {
                     undefined,
                     "init",
                     undefined,
-                    ts.factory.createTypeReferenceNode(name + "Init"),
+                    ts.factory.createTypeReferenceNode(types.init),
                     initRequired ? undefined : ts.factory.createObjectLiteralExpression([], false)
                 )
             ],
             ts.factory.createTypeReferenceNode("Promise", [
                 ts.factory.createTypeReferenceNode("WorkleapClientResponse", [
-                    ts.factory.createTypeReferenceNode(name + "Result"),
-                    ts.factory.createTypeReferenceNode(name + "Error")
+                    ts.factory.createUnionTypeNode(successTypes),
+                    ts.factory.createUnionTypeNode(errorTypes)
                 ])
             ]),
             ts.factory.createBlock(
@@ -219,15 +276,17 @@ function operationsToClient(operations: IHTTPOperation[]): string {
             )
         );
 
+        JSONSchema.annotate(functionNode, operation, `\`${operation.method.toUpperCase()} ${operation.path}\`\n`);
+
         ast.push(functionNode); 
     }
 
     return astToString(ast);
 }
 
-function toMethodName(operation: IHTTPOperation) {
-    if (operation.iid) {
-        return toSafeName(operation.iid);
+function toMethodName(operation: Operation) {
+    if (operation.operationId) {
+        return toCamelCase(JSONSchema.toSafeName(operation.operationId));
     }
 
     let methodName = operation.method;
@@ -263,4 +322,12 @@ function toMethodName(operation: IHTTPOperation) {
     }
 
     return methodName;
+}
+
+function capitalize(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function toCamelCase(str: string) {
+    return str.charAt(0).toLowerCase() + str.slice(1);
 }

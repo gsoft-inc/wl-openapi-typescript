@@ -1,7 +1,6 @@
 export const code = `
-export interface WorkleapClientInit extends RequestInit {
-    body?: any;
-    path?: Record<string, string | number>;
+export interface WorkleapClientInit {
+    request?: RequestInit;
 }
 
 export interface WorkleapClientResponseData<T> {
@@ -21,24 +20,22 @@ export type WorkleapClientResponse<D, E> = WorkleapClientResponseData<D> | Workl
 
 export class WorkleapClient {
     async fetch(url: string, init: WorkleapClientInit): Promise<WorkleapClientResponse<any, any>> {
-        if ("body" in init) {
-            if (typeof init.body === "object") {
-                init.body = JSON.stringify(init.body);
-            }
-        }
+        const requestInit = init.request ?? {};
         
+        let parsedUrl = url;
         if ("path" in init) {
             const path = init.path;
             for (const key in path) {
-                url = url.replace(\`{\${key}}\`, path[key].toString());
+                parsedUrl = url.replace(\`{\${key}}\`, path[key].toString());
             }
         }
 
-        const request = new Request(url, {
-            ...init,
+        const request = new Request(parsedUrl, {
+            body: init.body ? JSON.stringify(init.body) : undefined,
+            ...requestInit,
             headers: {
                 "Content-Type": "application/json",
-                ...init.headers
+                ...requestInit.headers
             }
         });
 

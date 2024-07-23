@@ -7,7 +7,6 @@ import { toFullyQualifiedURL } from "./utils.ts";
 import type { Plugin } from "./plugins/plugin.ts";
 import { headerPlugin } from "./plugins/header-plugin.ts";
 import { typesPlugin } from "./plugins/types-plugin.ts";
-import { openapiTypeScriptPlugin } from "./plugins/openapi-typescript-plugin.ts";
 
 const DEFAULT_CONFIG: InlineConfig = {
     configFile: "create-schemas.config",
@@ -16,7 +15,6 @@ const DEFAULT_CONFIG: InlineConfig = {
 } as const;
 
 const DEFAULT_PLUGINS_PRE = [
-    openapiTypeScriptPlugin(),
     typesPlugin()
 ];
 
