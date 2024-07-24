@@ -81,6 +81,58 @@ if (data?.point) {
 ```
 
 
+### `unstable_openapiMSWPlugin`
+
+!!!warning Warning
+
+This plugin is currently marked as **unstable**. It may change at any time.
+
+!!!
+
+**Description:**
+
+This plugins outputs a very thin wrapper over [openapi-msw](https://www.npmjs.com/package/openapi-msw). This package lets your define typed MSW handlers.
+
+To use this client, you need to install the `openapi-msw` package:
+
++++ pnpm
+```bash
+pnpm add openapi-msw
+```
++++ npm
+```bash
+npm install openapi-msw
+```
++++ yarn
+```bash
+yarn add openapi-msw
+```
++++
+
+**Example usage:**
+
+```ts #2,5 create-schemas.config.ts 
+import { defineConfig } from "@workleap/create-schemas";
+import { openapiMSWPlugin } from "@workleap/create-schemas/plugins";
+
+export default defineConfig({
+    plugins: [openapiMSWPlugin()]
+    input: "v1.yaml",
+    outdir: "codegen",
+});
+```
+
+```ts
+import { http } from "./codegen/openapi-msw.ts";
+
+export const handlers = [
+    http.get("/good-vibes-points/{userId}", ({ response }) => {
+        return response(200).json({ points: 50 });
+    });
+]
+```
+
+
 ## Creating a Plugin
 
 !!!danger Danger
@@ -122,7 +174,7 @@ export default defineConfig({
 });
 ```
 
-## Build hooks
+### Build hooks
 
 To interact with the code generation process, a plugin may include "hooks". Hooks are function that are are called at various stages of the generation. Hooks can affect how a build is run, add a file to the output, or modify a build once complete.
 
