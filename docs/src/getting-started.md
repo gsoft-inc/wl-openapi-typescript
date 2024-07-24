@@ -29,7 +29,7 @@ import { defineConfig } from "@workleap/create-schemas";
 
 export default defineConfig({
   input: "https://petstore3.swagger.io/api/v3/openapi.json", // replace with your own OpenAPI schema
-  output: "src/codegen/schema.ts",
+  outdir: "src/codegen",
 });
 ```
 
@@ -49,7 +49,7 @@ yarn create-schemas
 ```
 +++
 
-The `src/codegen/schema.ts` file should be created.
+The `src/codegen/types.ts` file should be created.
 
 ## Watch mode
 
