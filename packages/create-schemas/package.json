@@ -1,7 +1,7 @@
 {
     "name": "@workleap/create-schemas",
     "author": "Workleap",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "description": "CLI to generate Typescript schemas from an OpenAPI document",
     "license": "Apache-2.0",
     "repository": {
