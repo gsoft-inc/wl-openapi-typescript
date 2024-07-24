@@ -1,12 +1,13 @@
 
-import { assert, describe, expect, test } from "vitest";
+import { assert, describe, test } from "vitest";
 import { headerPlugin } from "../src/plugins/header-plugin.ts";
 import { typesPlugin } from "../src/plugins/types-plugin.ts";
 import { openapiTypeScriptId, openapiTypeScriptFilename } from "../src/plugins/openapi-typescript-plugin.ts";
 import { resolveConfig } from "../src/config.ts";
+import { unstable_openapiMSWPlugin } from "../src/plugins/openapi-msw-plugin.ts";
 
 describe.concurrent("plugins", () => {
-    test("headerPlugin", async() => {
+    test("headerPlugin", async({ expect }) => {
         const plugin = headerPlugin({ header: "This is a header" });
 
         assert(plugin.transform);
@@ -27,7 +28,7 @@ describe.concurrent("plugins", () => {
         `);
     });
 
-    test("typesPlugin", async() => {
+    test("typesPlugin", async ({ expect }) => {
         const plugin = typesPlugin();
 
         assert(plugin.transform);
@@ -67,6 +68,34 @@ describe.concurrent("plugins", () => {
           export type myorgUser = components["schemas"]["my.org.User"];
           export type Endpoints = keyof paths;
           "
+        `);
+    });
+
+    test("openapiMSWPlugin", async ({ expect }) => {
+        const plugin = unstable_openapiMSWPlugin();
+
+        assert(plugin.transform);
+
+        let emittedFile: { filename: string; code: string } | undefined;
+        function emitFile(file: { filename: string; code: string }) {
+            emittedFile = file;
+        }
+    
+        await plugin.transform({
+            config: await resolveConfig({ input: "openapi.json" }),
+            id: openapiTypeScriptId,
+            code: "export interface paths {}",
+            filename: openapiTypeScriptFilename,
+            emitFile
+        });
+
+        assert(emittedFile);
+
+        expect(emittedFile.filename).toBe("openapi-msw.ts");
+        expect(emittedFile.code).toMatchInlineSnapshot(`
+          "import type { paths } from "./types.ts";
+          import { createOpenApiHttp } from "openapi-msw";
+          export const http = createOpenApiHttp<paths>();"
         `);
     });
 });
