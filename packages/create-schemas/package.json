@@ -14,7 +14,9 @@
         "provenance": true
     },
     "type": "module",
-    "bin": "./dist/bin.js",
+    "bin": {
+        "create-schemas": "./bin/create-schemas.js"
+    },
     "exports": {
         ".": {
             "import": "./dist/index.js",
@@ -25,6 +27,10 @@
             "types": "./dist/plugins/index.d.ts"
         }
     },
+    "files": [
+        "bin",
+        "dist"
+    ],
     "scripts": {
         "dev": "tsup --config tsup.dev.ts",
         "test": "vitest",
