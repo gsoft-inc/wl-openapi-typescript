@@ -34,7 +34,7 @@ interface BinOptions {
 }
 
 export async function runCompiledBin(options: BinOptions): Promise<GenerationFile[]> {
-    const binUrl = new URL("../dist/bin.js", import.meta.url);
+    const binUrl = new URL("../bin/create-schemas.js", import.meta.url);
 
     const cwdArgs = options.cwd ? ["--cwd", options.cwd] : [];
 
