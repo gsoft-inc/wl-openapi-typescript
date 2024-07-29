@@ -90,6 +90,10 @@ The Plugin API is currently marked as **unstable**. It may change at any time.
 If you desire a specific plugin, please [open an issue on Github](https://github.com/gsoft-inc/wl-openapi-typescript/issues).
 !!!
 
+!!!
+This work is inspired by [Rollup plugin development](https://rollupjs.org/plugin-development/).
+!!!
+
 A plugin is an object with a `name` and one or more [build hooks](#build-hooks), which follows our conventions. A plugin should export a function that can be called with plugin specific options and returns such an object.
 
 Plugins allow you to customize `@workleap/create-schemas` behavior by, for example, modifying code before writing the files to disk.
@@ -124,7 +128,7 @@ export default defineConfig({
 
 ## Build hooks
 
-To interact with the code generation process, a plugin may include "hooks". Hooks are function that are are called at various stages of the generation. Hooks can affect how a build is run, add a file to the output, or modify a build once complete.
+   To interact with the code generation process, a plugin may include "hooks". Hooks are function that are are called at various stages of the generation. Hooks can affect how a build is run, add a file to the output, or modify a build once complete.
 
 ```mermaid
 ---
@@ -134,8 +138,10 @@ flowchart TB
     classDef parallel fill:#FFB3B3,color:black
     classDef sequential fill:#FFD2B3,color:black
 
-    parallel(parallel):::parallel 
-    sequential(sequential):::sequential 
+    subgraph Agenda
+        parallel(parallel):::parallel 
+        sequential(sequential):::sequential 
+    end 
 
     subgraph generate
         direction TB
@@ -144,7 +150,9 @@ flowchart TB
         --> gen_C(buildEnd):::parallel
     end
 
-    A[start] --> B(resolveConfig) --> generate  --> E[write files]
+    subgraph &nbsp;
+        A[start] --> B(resolveConfig) --> generate  --> E[write files]
+    end
 ```
 
 ### buildStart
