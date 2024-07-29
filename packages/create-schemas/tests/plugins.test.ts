@@ -4,7 +4,7 @@ import { headerPlugin } from "../src/plugins/header-plugin.ts";
 import { typesPlugin } from "../src/plugins/types-plugin.ts";
 import { openapiTypeScriptId, openapiTypeScriptFilename } from "../src/plugins/openapi-typescript-plugin.ts";
 import { resolveConfig } from "../src/config.ts";
-import { unstable_openapiMSWPlugin } from "../src/plugins/openapi-msw-plugin.ts";
+import { experimental_openapiMSWPlugin } from "../src/plugins/openapi-msw-plugin.ts";
 
 describe.concurrent("plugins", () => {
     test("headerPlugin", async({ expect }) => {
@@ -72,7 +72,7 @@ describe.concurrent("plugins", () => {
     });
 
     test("openapiMSWPlugin", async ({ expect }) => {
-        const plugin = unstable_openapiMSWPlugin();
+        const plugin = experimental_openapiMSWPlugin();
 
         assert(plugin.transform);
 
@@ -95,6 +95,7 @@ describe.concurrent("plugins", () => {
         expect(emittedFile.code).toMatchInlineSnapshot(`
           "import type { paths } from "./types.ts";
           import { createOpenApiHttp } from "openapi-msw";
+
           export const http = createOpenApiHttp<paths>();"
         `);
     });

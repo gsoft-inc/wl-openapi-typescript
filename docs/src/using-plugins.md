@@ -80,12 +80,11 @@ if (data?.point) {
 }
 ```
 
-
-### `unstable_openapiMSWPlugin`
+### `experimental_openapiMSWPlugin`
 
 !!!warning Warning
 
-This plugin is currently marked as **unstable**. It may change at any time.
+This plugin is currently marked as **experimental**. It may change at any time.
 
 !!!
 
@@ -113,23 +112,24 @@ yarn add openapi-msw
 
 ```ts #2,5 create-schemas.config.ts 
 import { defineConfig } from "@workleap/create-schemas";
-import { openapiMSWPlugin } from "@workleap/create-schemas/plugins";
+import { experimental_openapiMSWPlugin } from "@workleap/create-schemas/plugins";
 
 export default defineConfig({
-    plugins: [openapiMSWPlugin()]
+    plugins: [experimental_openapiMSWPlugin()]
     input: "v1.yaml",
     outdir: "codegen",
 });
 ```
 
-```ts
+```ts #5-6
 import { http } from "./codegen/openapi-msw.ts";
 
 export const handlers = [
     http.get("/good-vibes-points/{userId}", ({ response }) => {
-        return response(200).json({ points: 50 });
-    });
-]
+        return response(200).json({ pointx: 50 });
+                                 // ^^^^^^ Property "pointx" does not exist on type { points: number }
+    }),
+];
 ```
 
 

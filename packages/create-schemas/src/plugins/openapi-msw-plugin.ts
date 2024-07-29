@@ -1,10 +1,10 @@
-import type { Plugin } from "./plugin.ts";
 import { getRelativeModuleResolutionExtension } from "../utils.ts";
 import { openapiTypeScriptId } from "./openapi-typescript-plugin.ts";
+import type { Plugin } from "./plugin.ts";
 
-export function unstable_openapiMSWPlugin(): Plugin {
+export function experimental_openapiMSWPlugin(): Plugin {
     return {
-        name: "openapi-fetch-plugin",
+        name: "openapi-msw-plugin",
         async transform({ id, emitFile }) {
             if (id !== openapiTypeScriptId) {
                 return;
@@ -16,7 +16,7 @@ export function unstable_openapiMSWPlugin(): Plugin {
                 filename: "openapi-msw.ts",
                 code: [
                     `import type { paths } from "./types${importsFileExtension}";`,
-                    "import { createOpenApiHttp } from \"openapi-msw\";",
+                    "import { createOpenApiHttp } from \"openapi-msw\";\n",
                     "export const http = createOpenApiHttp<paths>();"
                 ].join("\n")
             });
