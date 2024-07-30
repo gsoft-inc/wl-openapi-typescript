@@ -5,6 +5,7 @@ import { typesPlugin } from "../src/plugins/types-plugin.ts";
 import { openapiTypeScriptId, openapiTypeScriptFilename } from "../src/plugins/openapi-typescript-plugin.ts";
 import { resolveConfig } from "../src/config.ts";
 import { experimental_openapiMSWPlugin } from "../src/plugins/openapi-msw-plugin.ts";
+import { experimental_openapiFetchPlugin } from "../src/plugins/openapi-fetch-plugin.ts";
 
 describe.concurrent("plugins", () => {
     test("headerPlugin", async({ expect }) => {
@@ -71,7 +72,36 @@ describe.concurrent("plugins", () => {
         `);
     });
 
-    test("openapiMSWPlugin", async ({ expect }) => {
+    test("openapiFetchPlugin generates a file when openapi typescript file generated", async ({ expect }) => {
+        const plugin = experimental_openapiFetchPlugin();
+
+        assert(plugin.transform);
+
+        let emittedFile: { filename: string; code: string } | undefined;
+        function emitFile(file: { filename: string; code: string }) {
+            emittedFile = file;
+        }
+  
+        await plugin.transform({
+            config: await resolveConfig({ input: "openapi.json" }),
+            id: openapiTypeScriptId,
+            code: "export interface paths {}",
+            filename: openapiTypeScriptFilename,
+            emitFile
+        });
+
+        assert(emittedFile);
+
+        expect(emittedFile.filename).toBe("client.ts");
+        expect(emittedFile.code).toMatchInlineSnapshot(`
+          "import type { paths } from "./types.ts";
+          import _createClient from "openapi-fetch";
+
+          export const createClient = _createClient as typeof _createClient<paths, "application/json">;"
+        `);
+    });
+
+    test("openapiMSWPlugin generates a file when openapi typescript file generated", async ({ expect }) => {
         const plugin = experimental_openapiMSWPlugin();
 
         assert(plugin.transform);
@@ -98,5 +128,25 @@ describe.concurrent("plugins", () => {
 
           export const http = createOpenApiHttp<paths>();"
         `);
+    });
+
+    test("openapiMSWPlugin doesn't generates a file when openapi typescript file missing", async ({ expect }) => {
+        const plugin = experimental_openapiMSWPlugin();
+
+        assert(plugin.transform);
+
+        let emittedFile: { filename: string; code: string } | undefined;
+        function emitFile(file: { filename: string; code: string }) {
+            emittedFile = file;
+        }
+  
+        await plugin.transform({
+            config: await resolveConfig({ input: "openapi.json" }),
+            code: "export interface paths {}",
+            filename: openapiTypeScriptFilename,
+            emitFile
+        });
+
+        expect(emittedFile).toBeUndefined();
     });
 });

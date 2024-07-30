@@ -4,7 +4,7 @@ import { resolveConfig } from "../src/config.ts";
 import { join } from "path";
 import { dataFolder } from "./fixtures.ts";
 import { openapiTypeScriptFilename } from "../src/plugins/openapi-typescript-plugin.ts";
-import { openapiFetchPlugin } from "../src/plugins/openapi-fetch-plugin.ts";
+import { experimental_openapiFetchPlugin } from "../src/plugins/openapi-fetch-plugin.ts";
 
 describe.concurrent("generate", () => {
     test("sanitize names", async ({ expect }) => {
@@ -46,7 +46,7 @@ describe.concurrent("generate", () => {
     test("generate client", async ({ expect }) => {
         const { files } = await generate(await resolveConfig({
             input: join(dataFolder, "todo.json"),
-            plugins: [openapiFetchPlugin()]
+            plugins: [experimental_openapiFetchPlugin()]
         }));
 
         const clientFile = files.find(file => file.filename === "client.ts");

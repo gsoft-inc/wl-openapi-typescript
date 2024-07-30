@@ -27,7 +27,7 @@ export default defineConfig({
 
 ## Built-in Plugins
 
-### `openapiFetchPlugin`
+### `experimental_openapiFetchPlugin`
 
 **Description:**
 
@@ -53,10 +53,10 @@ yarn add openapi-fetch
 
 ```ts #2,5 create-schemas.config.ts 
 import { defineConfig } from "@workleap/create-schemas";
-import { openapiFetchPlugin } from "@workleap/create-schemas/plugins";
+import { experimental_openapiFetchPlugin } from "@workleap/create-schemas/plugins";
 
 export default defineConfig({
-    plugins: [openapiFetchPlugin()]
+    plugins: [experimental_openapiFetchPlugin()]
     input: "v1.yaml",
     outdir: "codegen",
 });

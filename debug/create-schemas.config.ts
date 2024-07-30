@@ -1,8 +1,8 @@
 import { defineConfig } from "@workleap/create-schemas";
-import { openapiFetchPlugin, experimental_openapiMSWPlugin } from "@workleap/create-schemas/plugins";
+import { experimental_openapiFetchPlugin, experimental_openapiMSWPlugin } from "@workleap/create-schemas/plugins";
 
 export default defineConfig({
     input: "v1.yaml",
     outdir: "src/codegen/v1",
-    plugins: [openapiFetchPlugin(), experimental_openapiMSWPlugin()]
+    plugins: [experimental_openapiFetchPlugin(), experimental_openapiMSWPlugin()]
 });
