@@ -138,7 +138,7 @@ flowchart TB
     classDef parallel fill:#FFB3B3,color:black
     classDef sequential fill:#FFD2B3,color:black
 
-    subgraph Agenda
+    subgraph Legend
         parallel(parallel):::parallel 
         sequential(sequential):::sequential 
     end 
