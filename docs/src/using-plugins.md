@@ -128,7 +128,7 @@ export default defineConfig({
 
 ## Build hooks
 
-   To interact with the code generation process, a plugin may include "hooks". Hooks are function that are are called at various stages of the generation. Hooks can affect how a build is run, add a file to the output, or modify a build once complete.
+To interact with the code generation process, a plugin may include "hooks". Hooks are function that are are called at various stages of the generation. Hooks can affect how a build is run, add a file to the output, or modify a build once complete.
 
 ```mermaid
 ---
