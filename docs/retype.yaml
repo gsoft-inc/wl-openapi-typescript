@@ -20,6 +20,12 @@ edit:
     base: ./apps/docs/src
     branch: main
 
+links:
+  - text: Github
+    icon: mark-github
+    link:https://gsoft-inc.github.io/wl-openapi-typescript
+    target: blank
+
 footer:
     copyright: "&copy; Copyright {{ year }} - Workleap"
 

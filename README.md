@@ -12,6 +12,7 @@ Tools to generate TypeScript schemas from OpenAPI. It leverage [openapi-typescri
 | [@workleap/create-schemas](https://www.npmjs.org/package/@workleap/create-schemas)| [![NPM Version](http://img.shields.io/npm/v/@workleap/create-schemas.svg?style=flat)](https://www.npmjs.org/package/@workleap/create-schemas) |
 
 
+
 ## Usages
 
 Add a script in package.json to call `@workleap/create-schemas`
@@ -187,6 +188,13 @@ export type Endpoints = keyof paths;
 ```
 
 For more details on how to use see [openapi-typescript documentation](https://openapi-ts.pages.dev/introduction)
+
+## Documentation
+
+For documentations, please visit [our website](https://gsoft-inc.github.io/wl-openapi-typescript/).
+
+The documentation is automatically generated on each release from the files in the docs directory.
+
 
 ## 🤝 Contributing
 
