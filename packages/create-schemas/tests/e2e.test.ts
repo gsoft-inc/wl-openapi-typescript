@@ -104,9 +104,9 @@ describe.concurrent("e2e", () => {
             const tempFolder = await createTemporaryFolder({ onTestFinished: onTestFinished });
 
             const configFile = `
-            import { openapiFetchPlugin } from "../../../src/plugins";
+            import { experimental_openapiFetchPlugin } from "../../../src/plugins";
             
-            export default { plugins: [openapiFetchPlugin()] };
+            export default { plugins: [experimental_openapiFetchPlugin()] };
             `;
 
             await writeFile(join(tempFolder, "create-schemas.config.ts"), configFile);
