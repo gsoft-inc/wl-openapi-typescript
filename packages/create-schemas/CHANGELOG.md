@@ -1,5 +1,17 @@
 # @workleap/create-schemas
 
+## 0.3.0
+
+### Minor Changes
+
+- [#23](https://github.com/gsoft-inc/wl-openapi-typescript/pull/23) [`f2f35a7`](https://github.com/gsoft-inc/wl-openapi-typescript/commit/f2f35a7908e1c04dc05ac504158815b1202683ad) Thanks [@tjosepo](https://github.com/tjosepo)! - Add `experimental_openapiMSWPlugin`
+
+- [#23](https://github.com/gsoft-inc/wl-openapi-typescript/pull/23) [`f2f35a7`](https://github.com/gsoft-inc/wl-openapi-typescript/commit/f2f35a7908e1c04dc05ac504158815b1202683ad) Thanks [@tjosepo](https://github.com/tjosepo)! - [BREAKING] Rename `openapiFetchPlugin` to `experimental_openapiFetchPlugin`
+
+### Patch Changes
+
+- [#24](https://github.com/gsoft-inc/wl-openapi-typescript/pull/24) [`3c6be50`](https://github.com/gsoft-inc/wl-openapi-typescript/commit/3c6be50da3b2df13fa56cbca3ab503d66ddc7b41) Thanks [@tjosepo](https://github.com/tjosepo)! - Only include build output in package when published
+
 ## 0.2.0
 
 ### Minor Changes
