@@ -256,7 +256,7 @@ function operationsToClient(operations: Operation[]): string {
                 )
             ],
             ts.factory.createTypeReferenceNode("Promise", [
-                ts.factory.createTypeReferenceNode("WorkleapClientResponse", [
+                ts.factory.createTypeReferenceNode("Result", [
                     ts.factory.createUnionTypeNode(successTypes),
                     ts.factory.createUnionTypeNode(errorTypes)
                 ])

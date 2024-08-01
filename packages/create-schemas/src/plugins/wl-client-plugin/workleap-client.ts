@@ -3,22 +3,27 @@ export interface WorkleapClientInit {
     request?: RequestInit;
 }
 
-export interface WorkleapClientResponseData<T> {
+export type Result<D, E> = Ok<D> | Err<E>;
+
+export interface Ok<T> {
     data: T;
     error: undefined;
     response: Response;
 }
 
-export interface WorkleapClientResponseError<T> {
+export type Err<T> = {
     data: undefined;
     error: T;
     response: Response;
-}
-
-export type WorkleapClientResponse<D, E> = WorkleapClientResponseData<D> | WorkleapClientResponseError<E>;
+} | {
+    data: undefined;
+    error: Error;
+    response: undefined;
+};
 
 export class WorkleapClient {
-    async fetch(url: string, init: WorkleapClientInit = {}): Promise<WorkleapClientResponse<any, any>> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async fetch(url: string, init: any = {}): Promise<Result<any, any>> {
         const requestInit = init.request ?? {};
         
         let parsedUrl = url;

@@ -2,25 +2,41 @@
 
 export interface WorkleapClientInit {
     request?: RequestInit;
+    parseAs?: "arrayBuffer" | "blob" | "formData" | "json" | "text" | "stream" | "no-parse";
 }
 
-export interface WorkleapClientResponseData<T> {
+
+type PolyResult<T, U = unknown, V = unknown> =
+    T extends "arrayBuffer" ? Result<ArrayBuffer, V>
+        : T extends "blob" ? Result<Blob, V>
+            : T extends "formData" ? Result<FormData, V>
+                : T extends "json" ? Result<U, V>
+                    : T extends "text" ? Result<string, V>
+                        : T extends "stream" ? Result<ReadableStream<Uint8Array>, V>
+                            : T extends "none" ? Result<undefined, V>
+                                : Result<U, V>;
+
+export type Result<D, E> = Ok<D> | Err<E>;
+
+export interface Ok<T> {
+    ok: true;
     data: T;
-    error: undefined;
     response: Response;
 }
 
-export interface WorkleapClientResponseError<T> {
-    data: undefined;
+export type Err<T> = {
+    ok: false;
     error: T;
     response: Response;
-}
-
-export type WorkleapClientResponse<D, E> = WorkleapClientResponseData<D> | WorkleapClientResponseError<E>;
-
+} | {
+    ok: false;
+    error: Error;
+    response: undefined;
+};
 
 export class WorkleapClient {
-    async fetch(url: string, init: WorkleapClientInit): Promise<WorkleapClientResponse<any, any>> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async fetch(url: string, init: any = {}): Promise<Result<any, any>> {
         const requestInit = init.request ?? {};
         
         let parsedUrl = url;
@@ -62,28 +78,46 @@ export interface GetGoodVibesPointInit extends WorkleapClientInit {
         userId: string;
     };
 }
+
 /**
  * `GET /good-vibes-points/{userId}`
  *
  * Get the current number of good vibe for a user
  */
-export function getGoodVibesPoint(client: WorkleapClient, init: GetGoodVibesPointInit): Promise<WorkleapClientResponse<GetGoodVibePointsResult, ProblemDetails>> {
+export function getGoodVibesPoint<T extends GetGoodVibesPointInit>(client: WorkleapClient, init: T): Promise<PolyResult<T["parseAs"], GetGoodVibePointsResult, ProblemDetails>> {
     return client.fetch("/good-vibes-points/{userId}", init);
 }
 
-export type GetGoodVibePointsResult = {
+
+export interface GetGoodVibePointsResult {
     /**
      * @format `int32`
      */
     point: number;
-};
+}
+
 export type ProblemDetails = {
-    type: string;
-    title: string;
+    type?: string | null;
+    title?: string | null;
     /**
      * @format `int32`
      */
-    status: number;
-    detail: string;
-    instance: string;
-};
+    status?: number | null;
+    detail?: string | null;
+    instance?: string | null;
+} & Record<string, unknown>;
+
+
+const result = await getGoodVibesPoint(new WorkleapClient(), { path: { userId: "123" }, parseAs: "stream" });
+if (result.ok) {
+    const { data } = result;
+
+    return data;
+} else {
+    const { error, response } = result;
+    if (response?.status === 401) {
+        return redirect("/login");
+    } else {
+
+    }
+}

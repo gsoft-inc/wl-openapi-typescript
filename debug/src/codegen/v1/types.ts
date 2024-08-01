@@ -5,13 +5,15 @@ export type GetGoodVibePointsResult = {
      */
     point: number;
 };
+
 export type ProblemDetails = {
-    type: string;
-    title: string;
+    type?: string | null;
+    title?: string | null;
     /**
      * @format `int32`
      */
-    status: number;
-    detail: string;
-    instance: string;
-};
+    status?: number | null;
+    detail?: string | null;
+    instance?: string | null;
+} & Record<string, unknown>;
+
