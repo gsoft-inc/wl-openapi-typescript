@@ -1,65 +1,3 @@
-export const code = `
-export type TypedResponse<T> = Omit<Response, "json"> & {
-    json(): Promise<T>;
-};
-
-type Result<D, E> = Ok<D> | Err<E>;
-
-type Ok<T> = [TypedResponse<T>, undefined];
-
-type Err<T> = [undefined, TypedResponse<T> | Error];
-
-interface BaseClientOptions {
-    baseURL?: string;
-}
-
-class BaseClient {
-    options: BaseClientOptions;
-
-    constructor(options: BaseClientOptions = {}) {
-        this.options = options;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async fetch(url: string, init: any = {}): Promise<Result<any, any>> {
-        const requestInit = init.request ?? {};
-        
-        let parsedUrl = url;
-        if ("path" in init) {
-            const path = init.path;
-            for (const key in path) {
-                parsedUrl = url.replace(\`{\${key}}\`, path[key].toString());
-            }
-        }
-
-        if ("query" in init) {
-            const query = serializeQuery(init.query);
-            parsedUrl = \`\${parsedUrl}?\${query}\`;
-        }
-
-        const request = new Request(parsedUrl, {
-            body: init.body ? JSON.stringify(init.body) : undefined,
-            ...requestInit,
-            headers: {
-                "Content-Type": "application/json",
-                ...requestInit.headers
-            }
-        });
-
-        try {
-            const response = await fetch(request);
-
-            if (response.ok) {
-                return [response, undefined];
-            } else {
-                return [undefined, response];
-            }
-        } catch (error) {
-            return [undefined, error as Error];
-        }
-    }
-}
-    
 interface SerializeQueryOptions {
     style?: "form" | "spaceDelimited" | "pipeDelimited" | "deepObject";
     explode?: boolean;
@@ -99,7 +37,7 @@ export function serializeQuery(query: Record<string, unknown>, options: Serializ
             } else if (style === "deepObject") {
                 if (explode) {
                     for (const [subKey, subValue] of Object.entries(value)) {
-                        searchParams.add({ key: \`\${key}[\${subKey}]\`, value: subValue });
+                        searchParams.add({ key: `${key}[${subKey}]`, value: subValue });
                     }
                 }
             }
@@ -110,9 +48,6 @@ export function serializeQuery(query: Record<string, unknown>, options: Serializ
     }
 
     return [...searchParams.entries()]
-        .map(([{ key, value }]) => \`\${key}=\${value}\`)
+        .map(([{ key, value }]) => `${key}=${value}`)
         .join("&");
 }
-
-
-`;

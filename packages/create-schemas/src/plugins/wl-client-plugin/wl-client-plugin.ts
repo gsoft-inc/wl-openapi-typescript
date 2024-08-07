@@ -18,7 +18,7 @@ export function clientPlugin(): Plugin {
             const operations = getOperations(document);
             
             if (operations.length > 0) {
-                const code = operationsToClient(operations);
+                const code = operationsToClient(operations, JSONSchema.toSafeName(document.info.title));
                 const types = documentToTypeNodes(document);
 
                 emitFile({
@@ -129,12 +129,13 @@ function getOperations(document: any): Operation[] {
     return operations;
 }
 
-function operationsToClient(operations: Operation[]): string {
+function operationsToClient(operations: Operation[], clientName: string): string {
     const ast: ts.Node[] = [];
+    const methodDeclarations: ts.MethodDeclaration[] = [];
+    const importedTypes = new Set<string>();
+
     for (const operation of operations) {
         const name = toMethodName(operation);
-
-        const importedTypes = new Set<string>();
 
         const types = {
             init: capitalize(name) + "Init"
@@ -146,28 +147,30 @@ function operationsToClient(operations: Operation[]): string {
             const request = operation.request;
             const requestProperties: ts.PropertySignature[] = [];
             
-            
+            // ======== Body ========
             const match = Object.keys(request.body?.content ?? {}).find(contentType => contentType === mediaType);
             if (request.body && match) {
                 const bodyContent = request.body.content[match];
                 const bodyType = JSONSchema.toTypeScriptAST(bodyContent.schema);
+                JSONSchema.annotate(bodyType, bodyContent.schema);
                 requestProperties.push(
                     ts.factory.createPropertySignature(undefined, "body", undefined, bodyType)
                 );
                 initRequired = true; 
             }
 
+            // ======== Path Params ========
             let pathRequired = false;
             const pathProperties: ts.PropertySignature[] = [];
             for (const item of request.path) {
                 const questionToken = item.required ? undefined : ts.factory.createToken(ts.SyntaxKind.QuestionToken);
                 const property = ts.factory.createPropertySignature(
                     undefined,
-                    item.name,
+                    JSONSchema.isUnsafeName(item.name) ? ts.factory.createStringLiteral(item.name) : item.name,
                     questionToken,
-                    ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword)
+                    JSONSchema.toTypeScriptAST(item.schema)
                 );
-                JSONSchema.annotate(property, item);
+                JSONSchema.annotate(property, { ...item.schema, ...item });
                 pathProperties.push(property);
                 if (!questionToken) {
                     pathRequired = true;
@@ -186,13 +189,53 @@ function operationsToClient(operations: Operation[]): string {
                 );
             }
 
+            // ======== Query Params ========
+            let queryRequired = false;
+            const queryProperties: ts.PropertySignature[] = [];
+            for (const item of request.query) {
+                const questionToken = item.required ? undefined : ts.factory.createToken(ts.SyntaxKind.QuestionToken);
+                const property = ts.factory.createPropertySignature(
+                    undefined,
+                    JSONSchema.isUnsafeName(item.name) ? ts.factory.createStringLiteral(item.name) : item.name,
+                    questionToken,
+                    JSONSchema.toTypeScriptAST(item.schema)
+                );
+                JSONSchema.annotate(property, { ...item.schema, ...item });
+                queryProperties.push(property);
+                if (!questionToken) {
+                    queryRequired = true;
+                    initRequired = true;
+                }
+            }
+
+            if (queryProperties.length > 0) {
+                requestProperties.push(
+                    ts.factory.createPropertySignature(
+                        undefined,
+                        "query",
+                        queryRequired ? undefined : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+                        ts.factory.createTypeLiteralNode(queryProperties)
+                    )
+                );
+            }
+
+
+            requestProperties.push(
+                ts.factory.createPropertySignature(
+                    undefined,
+                    "request",
+                    ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+                    ts.factory.createTypeReferenceNode("RequestInit")
+                )
+            );
+
+
+            // ===== Init Type =====
             const interfaceNode = ts.factory.createInterfaceDeclaration(
                 [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
                 types.init,
                 undefined,
-                [ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [
-                    ts.factory.createExpressionWithTypeArguments(ts.factory.createIdentifier("WorkleapClientInit"), undefined)]
-                )],
+                undefined,
                 requestProperties
             );
 
@@ -212,6 +255,10 @@ function operationsToClient(operations: Operation[]): string {
             if (content.schema) {
                 const typeNode = JSONSchema.toTypeScriptAST(content.schema);
                 if (response.statusCode === "default") {
+                    // We assume "default" responses are errors. This is a
+                    // willful spec deviation, as the specification does not
+                    // say whether "default" responses are successful or error
+                    // responses.
                     errorTypes.push(typeNode);
                 } else if (response.statusCode >= 200 && response.statusCode < 300) {
                     successTypes.push(typeNode);
@@ -233,19 +280,14 @@ function operationsToClient(operations: Operation[]): string {
             errorTypes.push(ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword));
         }
 
-        const functionNode = ts.factory.createFunctionDeclaration(
-            [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        // ====== Methods ======
+        const methodNode = ts.factory.createMethodDeclaration(
+            undefined,
             undefined,
             name,
             undefined,
+            undefined,
             [
-                ts.factory.createParameterDeclaration(
-                    undefined,
-                    undefined,
-                    "client",
-                    undefined,
-                    ts.factory.createTypeReferenceNode("WorkleapClient")
-                ),
                 ts.factory.createParameterDeclaration(
                     undefined,
                     undefined,
@@ -264,8 +306,8 @@ function operationsToClient(operations: Operation[]): string {
             ts.factory.createBlock(
                 [ts.factory.createReturnStatement(ts.factory.createCallExpression(
                     ts.factory.createPropertyAccessExpression(
-                        ts.factory.createIdentifier("client"),
-                        ts.factory.createIdentifier("fetch")
+                        ts.factory.createThis(),
+                        "fetch"
                     ),
                     undefined,
                     [
@@ -277,10 +319,44 @@ function operationsToClient(operations: Operation[]): string {
             )
         );
 
-        JSONSchema.annotate(functionNode, operation, `\`${operation.method.toUpperCase()} ${operation.path}\`\n`);
+        JSONSchema.annotate(methodNode, operation, `\`${operation.method.toUpperCase()} ${operation.path}\`\n`);
 
-        ast.push(functionNode); 
+        methodDeclarations.push(methodNode); 
     }
+
+    const clientNode = ts.factory.createClassDeclaration(
+        [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        ts.factory.createIdentifier(clientName + "Client"),
+        undefined,
+        [ts.factory.createHeritageClause(ts.SyntaxKind.ExtendsKeyword, [ts.factory.createExpressionWithTypeArguments(ts.factory.createIdentifier("BaseClient"), undefined)])],
+        [
+            ts.factory.createConstructorDeclaration(
+                undefined,
+                [ts.factory.createParameterDeclaration(
+                    undefined,
+                    undefined,
+                    "options",
+                    undefined,
+                    ts.factory.createTypeReferenceNode("BaseClientOptions"),
+                    ts.factory.createObjectLiteralExpression(
+                        [],
+                        false
+                    )
+                )],
+                ts.factory.createBlock(
+                    [ts.factory.createExpressionStatement(ts.factory.createCallExpression(
+                        ts.factory.createSuper(),
+                        undefined,
+                        [ts.factory.createIdentifier("options")]
+                    ))],
+                    true
+                )
+            ),
+            ...methodDeclarations
+        ]
+    );
+
+    ast.push(clientNode);
 
     return JSONSchema.printAST(ast);
 }

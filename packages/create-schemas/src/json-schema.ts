@@ -5,6 +5,7 @@ import ts from "typescript";
  * Ref: https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01
  */
 export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
+    // Ref: https://json-schema.org/draft/2020-12/json-schema-core#name-boolean-json-schemas
     if (schema === true) {
         return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
     } 
@@ -107,7 +108,7 @@ export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
             }
 
             if (propertySignatures.length === 0) {
-                // Empty object "{}" is the shorthand for `any` type in OpenAPI
+                // Empty object "{}" is the shorthand for `any` type in JSON Schema
                 return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
             } else {
                 return ts.factory.createTypeLiteralNode(propertySignatures);
@@ -203,10 +204,10 @@ export function annotate(typeNode: ts.Node, schema: JSONSchema7, ...additionalCo
     const comments: string[] = [...additionalComments.flatMap(comment => comment.split("\n"))];
 
     if (schema.description) {
-        comments.push(schema.description);
+        comments.push(...schema.description.split("\n"));
     } else if ("summary" in schema && typeof schema.summary === "string") {
         // Only use summary as a fallback if description is not present
-        comments.push(schema.summary);
+        comments.push(...schema.summary.split("\n"));
     }
 
     if (schema.format) {
@@ -223,6 +224,9 @@ export function annotate(typeNode: ts.Node, schema: JSONSchema7, ...additionalCo
     }
     if (schema.minItems) {
         comments.push(`@minimum \`${schema.minItems}\``);
+    }
+    if (schema.default) {
+        comments.push(`@defaultValue \`${schema.default}\``);
     }
     if ("deprecated" in schema && schema.deprecated === true) {
         comments.push("@deprecated");
