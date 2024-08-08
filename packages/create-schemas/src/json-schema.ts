@@ -1,10 +1,10 @@
-import type { JSONSchema7, JSONSchema7Type } from "json-schema";
+import type { ReferenceObject, SchemaObject } from "openapi-typescript";
 import ts from "typescript";
 
 /**
  * Ref: https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-01
  */
-export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
+export function toTypeScriptAST(schema: SchemaObject | ReferenceObject | boolean | Record<string, never>): ts.TypeNode {
     // Ref: https://json-schema.org/draft/2020-12/json-schema-core#name-boolean-json-schemas
     if (schema === true) {
         return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
@@ -14,12 +14,17 @@ export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
         return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NeverKeyword);
     }
 
-    if (schema.const) {
-        return literalValueToTypeScriptAST(schema.const);
+    if ("$ref" in schema) {
+        return ts.factory.createTypeReferenceNode(refToIdentifier(schema.$ref));
     }
 
-    if (schema.$ref) {
-        return ts.factory.createTypeReferenceNode(refToIdentifier(schema.$ref));
+    if (Object.keys(schema).length === 0) {
+        // Empty object "{}" is the shorthand for `any` type in JSON Schema
+        return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+    }
+
+    if (schema.const) {
+        return literalValueToTypeScriptAST(schema.const);
     }
 
     if (schema.oneOf) {
@@ -45,8 +50,7 @@ export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
         return ts.factory.createUnionTypeNode([...typeNodes, ...combinations]);
     }
 
-    // This is an OpenAPI extension on top of JSON Schema
-    if ("nullable" in schema && schema.nullable === true) {
+    if (schema.nullable === true) {
         const nonNullableSchema = { ...schema };
 
         delete nonNullableSchema.nullable;
@@ -59,7 +63,7 @@ export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
 
     if (schema.type) {
         if (Array.isArray(schema.type)) {
-            return ts.factory.createUnionTypeNode(schema.type.map(type => toTypeScriptAST({ ...schema, type })));
+            return ts.factory.createUnionTypeNode(schema.type.map(type => toTypeScriptAST({ ...schema, type } as SchemaObject)));
         }
 
         if (typeof schema.type === "object" && "$ref" in schema.type) {
@@ -81,7 +85,7 @@ export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
                     toTypeScriptAST(property)
                 );
 
-                if (typeof property === "object") {
+                if ("$ref" in property === false) {
                     annotate(propertySignature, property);
                 }
 
@@ -166,7 +170,7 @@ export function toTypeScriptAST(schema: JSONSchema7 | boolean): ts.TypeNode {
     return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
 }
 
-function literalValueToTypeScriptAST(literalValue: JSONSchema7Type): ts.TypeNode {
+function literalValueToTypeScriptAST(literalValue: unknown): ts.TypeNode {
     if (literalValue === null) {
         return ts.factory.createLiteralTypeNode(ts.factory.createNull());
     } else if (typeof literalValue === "boolean") {
@@ -187,7 +191,7 @@ function literalValueToTypeScriptAST(literalValue: JSONSchema7Type): ts.TypeNode
     throw new Error(`Unsupported enum value: ${literalValue}`);
 }
 
-function enumToTypeScriptAST(enumerable: JSONSchema7Type[]): ts.TypeNode {
+function enumToTypeScriptAST(enumerable: unknown[]): ts.TypeNode {
     const nodes = enumerable.map(literalValueToTypeScriptAST);
 
     if (nodes.length === 0) {
@@ -200,36 +204,38 @@ function enumToTypeScriptAST(enumerable: JSONSchema7Type[]): ts.TypeNode {
 }
 
 /** Adds properties of schema to the type node as comment. */
-export function annotate(typeNode: ts.Node, schema: JSONSchema7, ...additionalComments: string[]) {
+export function annotate(typeNode: ts.Node, schema: unknown, ...additionalComments: string[]) {
     const comments: string[] = [...additionalComments.flatMap(comment => comment.split("\n"))];
 
-    if (schema.description) {
-        comments.push(...schema.description.split("\n"));
-    } else if ("summary" in schema && typeof schema.summary === "string") {
+    if (typeof schema === "object" && schema !== null) {
+        if ("description" in schema && typeof schema.description === "string") {
+            comments.push(...schema.description.split("\n"));
+        } else if ("summary" in schema && typeof schema.summary === "string") {
         // Only use summary as a fallback if description is not present
-        comments.push(...schema.summary.split("\n"));
-    }
+            comments.push(...schema.summary.split("\n"));
+        }
 
-    if (schema.format) {
-        comments.push(`@format \`${schema.format}\``);
-    }
-    if (schema.maximum) {
-        comments.push(`@maximum \`${schema.maximum}\``);
-    }
-    if (schema.minimum) {
-        comments.push(`@minimum \`${schema.minimum}\``);
-    }
-    if (schema.maxItems) {
-        comments.push(`@maximum \`${schema.maxItems}\``);
-    }
-    if (schema.minItems) {
-        comments.push(`@minimum \`${schema.minItems}\``);
-    }
-    if (schema.default) {
-        comments.push(`@defaultValue \`${schema.default}\``);
-    }
-    if ("deprecated" in schema && schema.deprecated === true) {
-        comments.push("@deprecated");
+        if ("format" in schema) {
+            comments.push(`@format \`${schema.format}\``);
+        }
+        if ("maximum" in schema) {
+            comments.push(`@maximum \`${schema.maximum}\``);
+        }
+        if ("minimum" in schema) {
+            comments.push(`@minimum \`${schema.minimum}\``);
+        }
+        if ("maxItems" in schema) {
+            comments.push(`@maximum \`${schema.maxItems}\``);
+        }
+        if ("minItems" in schema) {
+            comments.push(`@minimum \`${schema.minItems}\``);
+        }
+        if ("default" in schema) {
+            comments.push(`@defaultValue \`${schema.default}\``);
+        }
+        if ("deprecated" in schema && schema.deprecated === true) {
+            comments.push("@deprecated");
+        }
     }
     
     if (comments.length > 0) {
@@ -286,8 +292,8 @@ export function isUnsafeName(unsafeName: string): boolean {
     return toSafeName(unsafeName) !== unsafeName;
 }
 
-function isRequiredProperty(schema: JSONSchema7, propertyName: string): boolean {
-    if ("nullable" in schema && schema.nullable === true) {
+function isRequiredProperty(schema: SchemaObject, propertyName: string): boolean {
+    if (schema.nullable === true) {
         return false;
     }
 
@@ -318,6 +324,17 @@ export function refToPath(ref: string): string[] {
     }
 
     return parts;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function resolveRefObject<T>(refObject: T | ReferenceObject, object: Record<string, any>): T {
+    if (typeof refObject === "object" && refObject !== null && "$ref" in refObject) {
+        const parts = refToPath(refObject.$ref);
+
+        return parts.reduce((acc, part) => acc[part], object) as T;
+    } else {
+        return refObject;
+    }
 }
 
 export function printAST(node: ts.Node | ts.Node[]) {

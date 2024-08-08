@@ -1,9 +1,12 @@
-import { getGoodVibesPoint, WorkleapClient } from "./codegen/v1/wl-client.ts";
+// import { OpenAIAPIClient } from "./codegen/v1/wl-client.ts";
 
-const client = new WorkleapClient();
+// const client = new OpenAIAPIClient({
+//     baseURL: "https://api.openai.com/v1"
+// });
 
-const { data, error, response } = await getGoodVibesPoint(client, { path: { userId: "123" }, parseAs: "blob" });
+// const [response] = await client.getAssistant({ path : { assistant_id: "123" } });
 
-if (data) {
-    response;
-}
+// if (response) {
+//     const assistant = await response.json();
+//     console.log("Hello, " + assistant.name);
+// }

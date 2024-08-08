@@ -38,12 +38,12 @@
     },
     "devDependencies": {
         "@swc/helpers": "0.5.11",
-        "@types/json-schema": "7.0.15",
         "@types/node": "20.14.1",
         "@workleap/eslint-plugin": "3.2.2",
         "@workleap/swc-configs": "2.2.3",
         "@workleap/tsup-configs": "3.0.6",
         "eslint": "8.57.0",
+        "openapi-types": "12.1.3",
         "tsup": "8.1.0",
         "vitest": "1.6.0"
     },
@@ -51,9 +51,6 @@
         "node": ">=18.0.0"
     },
     "dependencies": {
-        "@apidevtools/json-schema-ref-parser": "^11.6.4",
-        "@apidevtools/swagger-parser": "^10.1.0",
-        "@stoplight/http-spec": "^7.1.0",
         "c12": "1.11.1",
         "chokidar": "3.6.0",
         "commander": "12.1.0",
