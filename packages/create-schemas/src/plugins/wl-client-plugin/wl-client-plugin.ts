@@ -83,39 +83,34 @@ function documentToClient(document: OpenAPI3): string {
             };
 
             // ====== Request ======
-            let initRequired = false;
             const requestProperties: ts.PropertySignature[] = [];
             
             // ======== Body ========
             const requestBody = JSONSchema.resolveRefObject(operation.requestBody, document);
+            const bodyRequired = requestBody?.required ?? false;
             if (requestBody) {
+                let typeNode: ts.TypeNode = ts.factory.createKeywordTypeNode(ts.SyntaxKind.NeverKeyword);
+
                 const applicationJson = JSONSchema.resolveRefObject(requestBody.content["application/json"], document);
                 if (applicationJson && applicationJson.schema) {
-                    const bodyType = JSONSchema.toTypeScriptAST(applicationJson.schema);
-                    JSONSchema.annotate(bodyType, JSONSchema.resolveRefObject(applicationJson.schema, document));
-
-                    requestProperties.push(
-                        ts.factory.createPropertySignature(
-                            undefined,
-                            "body",
-                            requestBody.required ? undefined : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-                            bodyType
-                        )
-                    );
-                    if (requestBody.required) {
-                        initRequired = true;
-                    }
+                    typeNode = JSONSchema.toTypeScriptAST(applicationJson.schema);
+                    JSONSchema.annotate(typeNode, JSONSchema.resolveRefObject(applicationJson.schema, document));
                 }
+
+                requestProperties.push(
+                    ts.factory.createPropertySignature(
+                        undefined,
+                        "body",
+                        requestBody.required ? undefined : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+                        typeNode
+                    )
+                );
             }
 
             // ======== Path Params ========
             const pathParams = parameters.filter(parameter => parameter.in === "path");
             const pathRequired = pathParams.some(item => item.required);
             const pathProperties = pathParams.map(parameterToTypeScriptAST);
-
-            if (pathRequired) {
-                initRequired = true;
-            }
 
             if (pathProperties.length > 0) {
                 requestProperties.push(
@@ -133,10 +128,6 @@ function documentToClient(document: OpenAPI3): string {
             const queryRequired = queryParams.some(item => item.required);
             const queryProperties = queryParams.map(parameterToTypeScriptAST);
 
-            if (queryRequired) {
-                initRequired = true;
-            }
-
             if (queryProperties.length > 0) {
                 requestProperties.push(ts.factory.createPropertySignature(
                     undefined,
@@ -146,6 +137,21 @@ function documentToClient(document: OpenAPI3): string {
                 ));
             }
 
+            // ======== Header Params ========
+            const headerParams = parameters.filter(parameter => parameter.in === "header");
+            const headerRequired = headerParams.some(item => item.required);
+            const headerProperties = headerParams.map(parameterToTypeScriptAST);
+            
+            if (headerProperties.length > 0) {
+                requestProperties.push(ts.factory.createPropertySignature(
+                    undefined,
+                    "header",
+                    headerRequired ? undefined : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+                    ts.factory.createTypeLiteralNode(headerProperties)
+                ));
+            }
+            
+            // ======== RequestInit ========
             requestProperties.push(
                 ts.factory.createPropertySignature(
                     undefined,
@@ -157,6 +163,7 @@ function documentToClient(document: OpenAPI3): string {
 
 
             // ===== Init Type =====
+            const initRequired = bodyRequired || pathRequired || queryRequired || headerRequired;
             const interfaceNode = ts.factory.createInterfaceDeclaration(
                 [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
                 types.init,

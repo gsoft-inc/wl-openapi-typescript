@@ -6,6 +6,7 @@
     "dev": "create-schemas"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.51.23",
     "@workleap/create-schemas": "workspace:*",
     "openapi-fetch": "0.10.2",
     "openapi-msw": "0.7.0"
