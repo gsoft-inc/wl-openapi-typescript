@@ -1,4 +1,5 @@
 import type { ResolvedConfig } from "./config.ts";
+import type { OpenAPIDocument } from "./types.ts";
 
 export interface GenerationResult {
     duration: number;
@@ -20,10 +21,29 @@ export async function generate(config: ResolvedConfig): Promise<GenerationResult
         files.push(file);
     }
 
+    // ====== Load ======
+    let document: OpenAPIDocument | undefined = undefined;
+    for (const plugin of config.plugins) {
+        if (plugin.load) {
+            const loadResult = await plugin.load({
+                config,
+                url: config.input
+            });
+            if (loadResult) {
+                document = loadResult;
+                break;
+            }
+        }
+    }
+
+    if (!document) {
+        throw new Error(`Failed to load OpenAPI document: "${config.input}"`);
+    }
+
     // ====== Build start ======
     await Promise.all(config.plugins.map(async plugin => {
         if (plugin.buildStart) {
-            await plugin.buildStart({ config, emitFile });
+            await plugin.buildStart({ config, emitFile, document });
         }
     }));
 
