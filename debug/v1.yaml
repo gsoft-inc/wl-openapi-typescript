@@ -29,6 +29,28 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/ProblemDetails"
+        post:
+            summary: Set the number of good vibe for a user
+            operationId: SetGoodVibesPoint
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                point:
+                                    type: integer
+                                    format: int32
+                            required:
+                                - point
 components:
     schemas:
         GetGoodVibePointsResult:

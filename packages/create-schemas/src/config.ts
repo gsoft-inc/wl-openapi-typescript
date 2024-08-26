@@ -17,9 +17,9 @@ const DEFAULT_CONFIG: InlineConfig = {
 } as const;
 
 const DEFAULT_PLUGINS_PRE = [
-    loaderPlugin(),
-    openapiTypeScriptPlugin(),
-    typesPlugin()
+    loaderPlugin()
+    // openapiTypeScriptPlugin(),
+    // typesPlugin()
 ];
 
 const DEFAULT_PLUGINS_POST = [

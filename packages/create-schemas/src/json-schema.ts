@@ -42,16 +42,15 @@ export function toTypeScriptAST(schema: SchemaObject | ReferenceObject | boolean
         // OpenAPI >=3.0
         const typeNodes = schema.anyOf.map(toTypeScriptAST);
 
-        const combinations = [];
-        for (let i = 0; i < typeNodes.length; i++) {
-            for (let j = i + 1; j < typeNodes.length; j++) {
-                combinations.push(
-                    ts.factory.createIntersectionTypeNode([typeNodes[i], typeNodes[j]])
-                );
+        const typeCombination = combinations(typeNodes).map(combos => {
+            if (combos.length === 1) {
+                return combos[0];
+            } else {
+                return ts.factory.createIntersectionTypeNode(combos);
             }
-        }
+        });
 
-        return ts.factory.createUnionTypeNode([...typeNodes, ...combinations]);
+        return ts.factory.createUnionTypeNode(typeCombination);
     }
 
     if ("nullable" in schema && schema.nullable === true) {
@@ -357,7 +356,7 @@ export function printAST(node: ts.Node | ts.Node[]) {
         "",
         ts.ScriptTarget.Latest,
         false,
-        ts.ScriptKind.TS
+        ts.ScriptKind.TSX
     );
   
     const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
@@ -373,4 +372,35 @@ export function printAST(node: ts.Node | ts.Node[]) {
     }
   
     return printer.printNode(ts.EmitHint.Unspecified, node, resultFile);
+}
+
+function combinations<T>(n: T[]): T[][] {
+    const combos: T[][] = [];
+
+    for (let i = 1; i <= n.length; i++) {
+        combos.push(...numberOfKCombinations(n, i));
+    }
+
+    return combos;
+}
+
+function numberOfKCombinations<T>(n: T[], k: number): T[][] {
+    const combos: T[][] = [];
+    
+    if (k === 1) {
+        return n.map(v => [v]);
+    }
+  
+    for (let i = 0; i < n.length; i++) {
+        const head = n.slice(i, i + 1);
+
+        const tail = numberOfKCombinations(n.slice(i + 1), k - 1);
+  
+        for (let j = 0; j < tail.length; j++) {
+            const combo = head.concat(tail[j]);
+            combos.push(combo);
+        }
+    }
+
+    return combos;
 }

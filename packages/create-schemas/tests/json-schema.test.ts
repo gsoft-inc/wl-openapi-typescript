@@ -158,7 +158,7 @@ describe.concurrent("JSONSchema", () => {
             });
             const text = JSONSchema.printAST(node);
             expect(text).toMatchInlineSnapshot(
-                "\"string | number | boolean | (string & number) | (string & boolean) | (number & boolean)\""
+                "\"string | number | boolean | (string & number) | (string & boolean) | (number & boolean) | (string & number & boolean)\""
             );
         });
 
