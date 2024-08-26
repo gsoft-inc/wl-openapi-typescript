@@ -1,7 +1,7 @@
 ---
 icon: code
 label: JavaScript API
-order: -5
+order: -6
 ---
 
 The JavaScript API allows you to use the features of `@workleap/create-schemas`

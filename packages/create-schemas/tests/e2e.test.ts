@@ -117,8 +117,6 @@ describe.concurrent("e2e", () => {
                 cwd: tempFolder
             });
 
-            console.log(result);
-
             const clientFile = result.find(file => file.filename === "client.ts");
             expect(clientFile).toBeDefined();
         },
