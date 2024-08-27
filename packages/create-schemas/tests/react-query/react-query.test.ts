@@ -122,7 +122,7 @@ describe.concurrent("react-query-plugin", () => {
         expect(file?.code).toMatchInlineSnapshot(`
           "import { createContext, useContext } from "react";
           import { useQuery, useSuspenseQuery, useMutation, type UseQueryResult, type UseQueryOptions, type UseSuspenseQueryResult, type UseMutationResult, type UseMutationOptions, type QueryKey, type QueryClient, type FetchQueryOptions, type UseSuspenseQueryOptions } from "@tanstack/react-query";
-          import { OpenAPIClient, internal_fetch } from "@workleap/create-schemas/plugins/client-plugin/base-client";
+          import { OpenAPIClient, internal_fetch } from "@workleap/create-schemas/plugins/react-query-plugin/openapi-client";
 
           export { OpenAPIClient };
 
