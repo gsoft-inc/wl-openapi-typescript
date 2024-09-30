@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Workleap OpenApi Typescript
-  description: Tools to generate TypeScript schemas from OpenAPI. 
+  description: Tools to generate TypeScript schemas from an OpenAPI specification. 
   x-cortex-git:
     github:
       alias: gsoft-inc
