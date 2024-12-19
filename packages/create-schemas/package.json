@@ -25,6 +25,10 @@
         "./plugins": {
             "import": "./dist/plugins/index.js",
             "types": "./dist/plugins/index.d.ts"
+        },
+        "./plugins/react-query-plugin/openapi-client": {
+            "import": "./dist/plugins/react-query-plugin/openapi-client.js",
+            "types": "./dist/plugins/react-query-plugin/openapi-client.d.ts"
         }
     },
     "files": [
@@ -37,12 +41,14 @@
         "build": "tsup --config tsup.build.ts"
     },
     "devDependencies": {
-        "@swc/helpers": "0.5.11",
         "@types/node": "20.14.1",
+        "@types/react": "^18.3.4",
         "@workleap/eslint-plugin": "3.2.2",
         "@workleap/swc-configs": "2.2.3",
         "@workleap/tsup-configs": "3.0.6",
         "eslint": "8.57.0",
+        "msw": "2.3.5",
+        "openapi-types": "12.1.3",
         "tsup": "8.1.0",
         "vitest": "1.6.0"
     },
@@ -56,6 +62,7 @@
         "kleur": "4.1.5",
         "openapi-typescript": "7.0.2",
         "typescript": "5.5.3",
+        "yaml": "2.4.5",
         "zod": "3.23.8"
     }
 }

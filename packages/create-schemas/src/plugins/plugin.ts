@@ -1,11 +1,20 @@
 import type { ResolvedConfig } from "../config.ts";
 import type { GenerationFile } from "../generate.ts";
+import type { OpenAPIDocument } from "../types.ts";
 
-type EmitFileFn = (file: { id?: unknown; filename: string; code: string }) => void;
+export interface EmittedFile { id?: unknown; filename: string; code: string }
+
+export interface LoadContext {
+    config: ResolvedConfig;
+    url: string;
+}
+
+export type LoadResult = undefined | OpenAPIDocument;
 
 export interface BuildStartContext {
     config: ResolvedConfig;
-    emitFile: EmitFileFn;
+    document: OpenAPIDocument;
+    emitFile: (file: EmittedFile) => void;
 }
 
 export interface TransformContext {
@@ -13,7 +22,7 @@ export interface TransformContext {
     id?: unknown;
     filename: string;
     code: string;
-    emitFile: EmitFileFn;
+    emitFile: (file: EmittedFile) => void;
 }
 
 export interface BuildEndContext {
@@ -27,6 +36,7 @@ export interface TransformResult {
 
 export interface Plugin {
     name: string;
+    load?: (context: LoadContext) => LoadResult | Promise<LoadResult>;
     buildStart?: (context: BuildStartContext) => void | Promise<void>;
     transform?: (context: TransformContext) => TransformResult | undefined | void | Promise<TransformResult | undefined | void>;
     buildEnd?: (context: BuildEndContext) => void | Promise<void>;

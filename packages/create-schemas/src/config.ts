@@ -8,6 +8,7 @@ import type { Plugin } from "./plugins/plugin.ts";
 import { headerPlugin } from "./plugins/header-plugin.ts";
 import { typesPlugin } from "./plugins/types-plugin.ts";
 import { openapiTypeScriptPlugin } from "./plugins/openapi-typescript-plugin.ts";
+import { loaderPlugin } from "./plugins/loader-plugin.ts";
 
 const DEFAULT_CONFIG: InlineConfig = {
     configFile: "create-schemas.config",
@@ -16,6 +17,7 @@ const DEFAULT_CONFIG: InlineConfig = {
 } as const;
 
 const DEFAULT_PLUGINS_PRE = [
+    loaderPlugin(),
     openapiTypeScriptPlugin(),
     typesPlugin()
 ];
@@ -42,6 +44,7 @@ export interface InlineConfig extends UserConfig {
 
 const pluginSchema = z.object({
     name: z.string(),
+    load: z.custom<Plugin["load"]>().optional(),
     buildStart: z.custom<Plugin["buildStart"]>().optional(),
     transform: z.custom<Plugin["transform"]>().optional(),
     buildEnd: z.custom<Plugin["buildEnd"]>().optional()

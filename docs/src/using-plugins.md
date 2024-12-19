@@ -197,9 +197,10 @@ flowchart TB
 
     subgraph generate
         direction TB
-        gen_A(startBuild):::parallel 
-        --> gen_B(transform):::sequential
-        --> gen_C(buildEnd):::parallel
+        load:::sequential
+        --> startBuild:::parallel
+        --> transform:::sequential
+        --> buildEnd:::parallel
     end
 
     subgraph &nbsp;

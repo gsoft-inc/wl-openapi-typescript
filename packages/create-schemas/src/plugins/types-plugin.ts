@@ -3,6 +3,7 @@ import { astToString, stringToAST } from "openapi-typescript";
 import ts from "typescript";
 import type { Plugin } from "./plugin.ts";
 import { openapiTypeScriptId } from "./openapi-typescript-plugin.ts";
+import * as JSONSchema from "../json-schema.ts";
 
 const componentsIdentifier = "components";
 const schemasIdentifier = "schemas";
@@ -36,13 +37,13 @@ export function typesPlugin(): Plugin {
                         throw new Error(`Invalid schema name: ${name}`);
                     }
 
-                    if (toSafeName(name).length === 0) {
+                    if (JSONSchema.toSafeName(name).length === 0) {
                         throw new Error(`Invalid schema name: ${name}`);
                     }
 
                     return name;
                 })
-                .map(name => `export type ${toSafeName(name)} = ${componentsIdentifier}["${schemasIdentifier}"]["${name}"];`)
+                .map(name => `export type ${JSONSchema.toSafeName(name)} = ${componentsIdentifier}["${schemasIdentifier}"]["${name}"];`)
                 .flatMap(stringToAST) as ts.Node[];
 
             const endpointsDeclaration = stringToAST("export type Endpoints = keyof paths;") as ts.Node[];
@@ -62,40 +63,4 @@ export function isComponentsSchema(node: ts.Node): node is ts.PropertySignature 
     return ts.isPropertySignature(node) 
     && (ts.isIdentifier(node.name) || ts.isStringLiteral(node.name))
     && node.name.text === schemasIdentifier;
-}
-
-/**
- * OpenAPI field names must match `^[a-zA-Z0-9\.\-_]+$` which allows names that
- * are not valid JavaScript/TypeScript identifiers. This function converts an
- * unsafe name into a safe name that can be used as a JavaScript/TypeScript
- * identifier.
- */
-export function toSafeName(unsafeName: string): string {
-    let safeName = "";
-    for (const char of unsafeName) {
-        const charCode = char.charCodeAt(0);
-
-        // A-Z
-        if (charCode >= 65 && charCode <= 90) {
-            safeName += char;
-        }
-
-        // a-z
-        if (charCode >= 97 && charCode <= 122) {
-            safeName += char;
-        }
-
-        if (char === "_" || char === "$") {
-            safeName += char;
-        }
-
-        // 0-9
-        if (safeName.length > 0 && charCode >= 48 && charCode <= 57) {
-            safeName += char;
-        }
-
-        continue;
-    }
-
-    return safeName;
 }
