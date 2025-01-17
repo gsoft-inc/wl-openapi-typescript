@@ -1,0 +1,14 @@
+name: Semgrep scan
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch: {}
+  schedule:
+    - cron: "10 8 * * 6"
+
+jobs:
+  call-workflow-semgrep:
+    permissions:
+      security-events: write
+    uses: gsoft-inc/wl-reusable-workflows/.github/workflows/reusable-semgrep-workflow.yml@main
