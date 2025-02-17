@@ -1,7 +1,7 @@
 # wl-openapi-typescript
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
-[![CI](https://github.com/gsoft-inc/wl-openapi-typescript/actions/workflows/ci.yml/badge.svg)](https://github.com/gsoft-inc/wl-openapi-typescript/actions/workflows/ci.yml)
+[![CI](https://github.com/workleap/wl-openapi-typescript/actions/workflows/ci.yml/badge.svg)](https://github.com/workleap/wl-openapi-typescript/actions/workflows/ci.yml)
 
 Tools to generate TypeScript schemas from OpenAPI. It leverage [openapi-typescript](https://github.com/drwpow/openapi-typescript) and re-export types in a more user friendly way.
 
@@ -191,7 +191,7 @@ For more details on how to use see [openapi-typescript documentation](https://op
 
 ## Documentation
 
-For documentations, please visit [our website](https://gsoft-inc.github.io/wl-openapi-typescript/).
+For documentations, please visit [our website](https://workleap.github.io/wl-openapi-typescript/).
 
 The documentation is automatically generated on each release from the files in the docs directory.
 

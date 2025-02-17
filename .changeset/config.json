@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "gsoft-inc/wl-openapi-typescript"
+      "repo": "workleap/wl-openapi-typescript"
     }
   ],
   "commit": false,

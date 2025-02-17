@@ -90,4 +90,4 @@ If you have a more complex use case that isn't supported by
 `@workleap/create-schemas` you can try extending the behavior of the library by
 [Creating a Plugin](./using-plugins#creating-a-plugin) or using the [JavaScript API](./javascript-api).
 
-If you think many users would benefit from a use case being officially supported, we encourage you to [open an issue on Github](https://github.com/gsoft-inc/wl-openapi-typescript/issues).
+If you think many users would benefit from a use case being officially supported, we encourage you to [open an issue on Github](https://github.com/workleap/wl-openapi-typescript/issues).
