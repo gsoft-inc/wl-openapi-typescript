@@ -191,7 +191,7 @@ For more details on how to use see [openapi-typescript documentation](https://op
 
 ## Documentation
 
-For documentations, please visit [our website](https://gsoft-inc.github.io/wl-openapi-typescript/).
+For documentations, please visit [our website](https://workleap.github.io/wl-openapi-typescript/).
 
 The documentation is automatically generated on each release from the files in the docs directory.
 
