@@ -139,7 +139,7 @@ export const handlers = [
 
 The Plugin API is currently marked as **unstable**. It may change at any time.
 
-If you desire a specific plugin, please [open an issue on Github](https://github.com/gsoft-inc/wl-openapi-typescript/issues).
+If you desire a specific plugin, please [open an issue on Github](https://github.com/workleap/wl-openapi-typescript/issues).
 !!!
 
 !!!
