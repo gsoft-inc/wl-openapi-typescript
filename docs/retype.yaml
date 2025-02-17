@@ -16,7 +16,7 @@ branding:
 favicon: ./resources/favicon.png
 
 edit:
-    repo: https://github.com/gsoft-inc/wl-openapi-typescript
+    repo: https://github.com/workleap/wl-openapi-typescript
     base: ./apps/docs/src
     branch: main
 
