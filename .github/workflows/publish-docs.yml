@@ -18,12 +18,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "7.0.x"
 
       - name: Build with Retype
         uses: retypeapp/action-build@latest
         id: retype
+        env:
+          DOTNET_ROLL_FORWARD: LatestMajor
         with:
           config: docs/retype.yaml
           license: ${{ secrets.RETYPE_API_KEY }}
