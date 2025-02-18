@@ -23,7 +23,7 @@ edit:
 links:
   - text: Github
     icon: mark-github
-    link:https://workleap.github.io/wl-openapi-typescript
+    link: https://workleap.github.io/wl-openapi-typescript
     target: blank
 
 footer:
