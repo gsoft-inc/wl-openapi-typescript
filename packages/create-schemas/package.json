@@ -37,25 +37,25 @@
         "build": "tsup --config tsup.build.ts"
     },
     "devDependencies": {
-        "@swc/helpers": "0.5.11",
-        "@types/node": "20.14.1",
-        "@workleap/eslint-plugin": "3.2.2",
-        "@workleap/swc-configs": "2.2.3",
-        "@workleap/tsup-configs": "3.0.6",
-        "eslint": "8.57.0",
-        "tsup": "8.1.0",
+        "@swc/helpers": "0.5.15",
+        "@types/node": "20.17.19",
+        "@workleap/eslint-plugin": "3.2.6",
+        "@workleap/swc-configs": "2.2.4",
+        "@workleap/tsup-configs": "3.0.7",
+        "eslint": "8.57.1",
+        "tsup": "8.3.6",
         "vitest": "1.6.0"
     },
     "engines": {
         "node": ">=18.0.0"
     },
     "dependencies": {
-        "c12": "1.11.1",
+        "c12": "1.11.2",
         "chokidar": "3.6.0",
         "commander": "12.1.0",
         "kleur": "4.1.5",
-        "openapi-typescript": "7.0.2",
-        "typescript": "5.5.3",
-        "zod": "3.23.8"
+        "openapi-typescript": "7.6.1",
+        "typescript": "5.7.3",
+        "zod": "3.24.2"
     }
 }
