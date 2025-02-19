@@ -29,7 +29,7 @@
         "@changesets/cli": "2.27.7",
         "@workleap/eslint-plugin": "3.2.2",
         "@workleap/typescript-configs": "3.0.2",
-        "eslint": "8.57.0",
+        "eslint": "9.20.1",
         "typescript": "5.5.3"
     },
     "engines": {
