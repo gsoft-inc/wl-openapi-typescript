@@ -8,6 +8,6 @@
   "dependencies": {
     "@workleap/create-schemas": "workspace:*",
     "openapi-fetch": "0.10.2",
-    "openapi-msw": "0.7.0"
+    "openapi-msw": "1.1.0"
   }
 }

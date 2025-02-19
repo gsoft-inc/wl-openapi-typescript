@@ -38,11 +38,11 @@
     },
     "devDependencies": {
         "@swc/helpers": "0.5.11",
-        "@types/node": "20.14.1",
+        "@types/node": "22.13.4",
         "@workleap/eslint-plugin": "3.2.2",
         "@workleap/swc-configs": "2.2.3",
         "@workleap/tsup-configs": "3.0.6",
-        "eslint": "8.57.0",
+        "eslint": "9.20.1",
         "tsup": "8.1.0",
         "vitest": "1.6.0"
     },
@@ -50,9 +50,9 @@
         "node": ">=18.0.0"
     },
     "dependencies": {
-        "c12": "1.11.1",
-        "chokidar": "3.6.0",
-        "commander": "12.1.0",
+        "c12": "2.0.2",
+        "chokidar": "4.0.3",
+        "commander": "13.1.0",
         "kleur": "4.1.5",
         "openapi-typescript": "7.0.2",
         "typescript": "5.5.3",
